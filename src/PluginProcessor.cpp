@@ -242,6 +242,8 @@ void PluginTemplateProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = params.copyState();
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    xml->setAttribute (Settings::OSC::OSCHostname, oscSender.getHostName());
+    xml->setAttribute (Settings::OSC::OSCPort, oscSender.getPortNumber());
     copyXmlToBinary (*xml, destData);
 }
 
@@ -251,7 +253,17 @@ void PluginTemplateProcessor::setStateInformation (const void* data, int sizeInB
 
     if (xmlState.get() != nullptr)
         if (xmlState->hasTagName (params.state.getType()))
+        {
+            auto hostname = xmlState->getStringAttribute (Settings::OSC::OSCHostname);
+            auto port = xmlState->getIntAttribute (Settings::OSC::OSCPort, -1);
+
+            oscSender.connect (hostname, port);
+
+            xmlState->removeAttribute (Settings::OSC::OSCHostname);
+            xmlState->removeAttribute (Settings::OSC::OSCPort);
+
             params.replaceState (juce::ValueTree::fromXml (*xmlState));
+        }
 }
 
 void PluginTemplateProcessor::parameterChanged (const juce::String &parameterID, float newValue)
