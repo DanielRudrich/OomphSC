@@ -1,0 +1,55 @@
+name: Build Plug-in
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  windows:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Build that thing
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build . --target install --config Release
+      - name: Zip it
+        shell: powershell
+        run:  |
+          cd build/OomphSC_artefacts/Release/VST3
+          ls
+          Compress-Archive -Path OomphSC.vst3 -DestinationPath OomphSC_win.zip
+      - name: Upload it
+        uses: actions/upload-artifact@v1
+        with:
+          name: OomphSC_win
+          path: build/OomphSC_artefacts/Release/VST3/OomphSC_win.zip
+
+  macos:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Build that thing
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make -j 4
+      - name: Zip it
+        run:  |
+          cd build/OomphSC_artefacts/Release/VST
+          zip -r OomphSC_macOS.zip OomphSC.vst3
+      - uses: actions/upload-artifact@v1
+        with:
+          name: OomphSC_macOS
+          path: build/OomphSC_artefacts/Release/VST/OomphSC_macOS.zip
