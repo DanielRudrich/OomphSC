@@ -52,4 +52,4 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: OomphSC_macOS
-          path: build/OomphSC_artefacts/Release/VST/OomphSC_macOS.zip
+          path: build/OomphSC_artefacts/Release/VST3/OomphSC_macOS.zip
