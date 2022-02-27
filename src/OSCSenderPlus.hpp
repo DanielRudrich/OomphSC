@@ -25,6 +25,7 @@ public:
             return true;
         }
 
+        disconnect();
         if (juce::OSCSender::connect (targetHostName, port))
         {
             connected.store (true, std::memory_order_relaxed);

@@ -50,7 +50,7 @@ struct Parameters
         static inline juce::String name = "Attack time in ms";
         static inline juce::String unit = "ms";
         static constexpr float min = 0.0f;
-        static constexpr float max = 10.0f;
+        static constexpr float max = 200.0f;
         static constexpr float defaultValue = 5.0f;
     };
 

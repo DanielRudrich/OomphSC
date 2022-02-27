@@ -54,6 +54,8 @@ public:
     std::array<std::atomic<float>, Settings::numRMS> rmsValues;
 
     OSCSenderPlus& getOSCSender() { return oscSender; }
+
+    juce::AudioProcessorValueTreeState& getAPVTS() { return params; }
     
 private:
     juce::AudioProcessorValueTreeState params;

@@ -108,7 +108,7 @@ public:
     std::function<void()> onReturnKey;
 
 private:
-    void returnKeyPressed()
+    void returnKeyPressed() const noexcept
     {
         if (onReturnKey)
             onReturnKey();

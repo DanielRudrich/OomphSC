@@ -16,11 +16,12 @@ class OSCComponent : public juce::Component
 public:
     OSCComponent (OSCSenderPlus& o) : oscSender (o)
     {
+        ipAndPort.onReturnKey = [&]() { connect(); };
         ipAndPort.setIP (o.getHostName());
         ipAndPort.setPort (o.getPortNumber());
         addAndMakeVisible (ipAndPort);
 
-        connectButton.setButtonText ("connect");
+        updateButtonText();
         connectButton.onClick = [&] () { toggleConnection(); };
         addAndMakeVisible (connectButton);
     }
@@ -30,12 +31,25 @@ public:
     void toggleConnection()
     {
         if (oscSender.isConnected())
+        {
             oscSender.disconnect();
+            ipAndPort.setState (IpAndPortComponent::State::disconnected);
+        }
         else
-            oscSender.connect (ipAndPort.getIP(), ipAndPort.getPort());
+            connect();
 
         ipAndPort.setState (oscSender.isConnected() ? IpAndPortComponent::State::connected : IpAndPortComponent::State::disconnected);
-        connectButton.setButtonText (oscSender.isConnected() ? "disconnect" : "connect");
+        updateButtonText();
+    }
+
+    void connect() noexcept
+    {
+        if (oscSender.connect (ipAndPort.getIP(), ipAndPort.getPort()))
+            ipAndPort.setState (IpAndPortComponent::State::connected);
+        else
+            ipAndPort.setState (IpAndPortComponent::State::error);
+
+        updateButtonText();
     }
 
     void resized() override
@@ -48,6 +62,11 @@ public:
 
 
 private:
+    void updateButtonText()
+    {
+        connectButton.setButtonText (oscSender.isConnected() ? "disconnect" : "connect");
+    }
+
     OSCSenderPlus& oscSender;
 
     IpAndPortComponent ipAndPort;
