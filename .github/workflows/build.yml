@@ -47,7 +47,7 @@ jobs:
           make -j 4
       - name: Zip it
         run:  |
-          cd build/OomphSC_artefacts/Release/VST
+          cd build/OomphSC_artefacts/Release/VST3
           zip -r OomphSC_macOS.zip OomphSC.vst3
       - uses: actions/upload-artifact@v1
         with:
