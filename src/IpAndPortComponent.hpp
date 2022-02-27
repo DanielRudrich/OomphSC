@@ -105,6 +105,20 @@ public:
         repaint();
     }
 
+    void lookAndFeelChanged() override
+    {
+        // very ugly workaround ...
+        auto updateTextColour = [] (juce::TextEditor& e)
+        {
+            auto previousContent = e.getText();
+            e.setText ("");
+            e.setText (previousContent);
+        };
+
+        updateTextColour (ip);
+        updateTextColour (port);
+    }
+
     std::function<void()> onReturnKey;
 
 private:
