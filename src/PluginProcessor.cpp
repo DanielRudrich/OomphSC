@@ -79,8 +79,9 @@ PluginTemplateProcessor::PluginTemplateProcessor()
     using namespace juce::dsp;
     using namespace Settings;
 
-    for (auto& e : crossOvers)
-        e.setCutoffFrequency (1'000.0f);
+    crossOvers[0].setCutoffFrequency (Settings::Parameters::CrossOver1::defaultValue);
+    crossOvers[1].setCutoffFrequency (Settings::Parameters::CrossOver2::defaultValue);
+    crossOvers[2].setCutoffFrequency (Settings::Parameters::CrossOver3::defaultValue);
 
     for (auto& e : rms)
     {
