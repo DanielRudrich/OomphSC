@@ -25,6 +25,8 @@ juce_generate_juce_header (OomphSC)
 
 target_sources (OomphSC PRIVATE
     src/Settings.hpp
+    src/OSCComponent.hpp
+    src/OSCSenderPlus.hpp
     src/PluginProcessor.hpp
     src/PluginProcessor.cpp
     src/PluginEditor.hpp
@@ -41,6 +43,7 @@ target_link_libraries (OomphSC
     PRIVATE
         juce::juce_audio_utils
         juce::juce_dsp
+        juce::juce_osc
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags

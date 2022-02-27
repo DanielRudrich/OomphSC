@@ -4,6 +4,7 @@
 #include <array>
 
 #include "Settings.hpp"
+#include "OSCSenderPlus.hpp"
 
 //==============================================================================
 /**
@@ -51,9 +52,12 @@ public:
     void parameterChanged (const juce::String &parameterID, float newValue) override;
 
     std::array<std::atomic<float>, Settings::numRMS> rmsValues;
+
+    OSCSenderPlus& getOSCSender() { return oscSender; }
     
 private:
     juce::AudioProcessorValueTreeState params;
+    OSCSenderPlus oscSender;
 
 
     std::array<juce::dsp::BallisticsFilter<float>, Settings::numRMS> rms;

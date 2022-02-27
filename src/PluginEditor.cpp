@@ -1,8 +1,9 @@
 #include "PluginEditor.hpp"
 
+
 //==============================================================================
 PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
-    AudioProcessorEditor (&p), processorReference (p)
+    AudioProcessorEditor (&p), processorReference (p), oscComponent (processorReference.getOSCSender())
 {
     using namespace juce;
     for (auto& s : slider)
@@ -12,6 +13,8 @@ PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
         s.setRange (0, 1);
         addAndMakeVisible (s);
     }
+
+    addAndMakeVisible (oscComponent);
 
     setSize (400, 300);
     startTimerHz (50);
@@ -41,6 +44,7 @@ void PluginTemplateEditor::paint (juce::Graphics& g)
 void PluginTemplateEditor::resized()
 {
     auto bounds = getLocalBounds();
+    oscComponent.setBounds (bounds.removeFromTop (40));
 
     for (auto& s : slider)
         s.setBounds (bounds.removeFromLeft (20));

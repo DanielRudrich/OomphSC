@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PluginProcessor.hpp"
+#include "OSCComponent.hpp"
 
 //==============================================================================
 class PluginTemplateEditor : public juce::AudioProcessorEditor, private juce::Timer
@@ -18,6 +19,8 @@ public:
     
 private:
     PluginTemplateProcessor& processorReference;
+
+    OSCComponent oscComponent;
 
     std::array<juce::Slider, 5> slider;
 
