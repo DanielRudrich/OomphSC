@@ -8,6 +8,12 @@ static constexpr int numBands = 4;
 static constexpr int numCrossOvers = numBands - 1;
 static constexpr int numRMS = numBands + 1;
 
+struct OSC
+{
+    static inline juce::Identifier OSCPort = "OSCPort";
+    static inline juce::Identifier OSCHostname = "OSCHostname";
+};
+
 struct Parameters
 {
 
@@ -18,7 +24,7 @@ struct Parameters
         static inline juce::String unit = "Hz";
         static constexpr float min = 20.0f;
         static constexpr float max = 20000.0f;
-        static constexpr float defaultValue = 200.0f;
+        static constexpr float defaultValue = 100.0f;
         static constexpr float skew = 0.4f;
     };
 
