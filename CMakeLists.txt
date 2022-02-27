@@ -17,7 +17,7 @@ juce_add_plugin (OomphSC
     PLUGIN_CODE OoSC
     COMPANY_NAME "Daniel Rudrich"
     PRODUCT_NAME "OomphSC"
-    FORMATS Standalone VST3
+    FORMATS VST3
     COPY_PLUGIN_AFTER_BUILD True)
 
 juce_generate_juce_header (OomphSC)
