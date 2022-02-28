@@ -30,7 +30,8 @@ target_sources (OomphSC PRIVATE
     src/PluginProcessor.hpp
     src/PluginProcessor.cpp
     src/PluginEditor.hpp
-    src/PluginEditor.cpp)
+    src/PluginEditor.cpp
+    src/Visualizer.hpp)
 
 target_compile_definitions (OomphSC PUBLIC
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_gui_app` call

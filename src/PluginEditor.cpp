@@ -9,16 +9,6 @@ PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
 
     auto& params = processorReference.getAPVTS();
 
-    std::array<juce::Colour, 5> colours =
-    {
-        juce::Colours::cornflowerblue,
-        juce::Colours::limegreen,
-        juce::Colours::orange,
-        juce::Colours::orangered,
-        juce::Colours::black
-    };
-
-
     attack.setSliderStyle (Slider::LinearBar);
     attackAttachment = std::make_unique<SliderAttachment> (params, Settings::Parameters::Attack::id, attack);
     attack.setTextValueSuffix (" ms Attack");
@@ -42,18 +32,9 @@ PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
         crossOverFrequenciesAttachments[i] = std::make_unique<SliderAttachment> (params, ids[(int) i], s);
     }
 
-
-    for (size_t i = 0; i < Settings::numRMS; ++i)
-    {
-        auto& s = slider[i];
-        s.setColour (Slider::ColourIds::trackColourId, colours[i]);
-        s.setSliderStyle (Slider::LinearBarVertical);
-        s.setTextBoxStyle (Slider::NoTextBox, true, 0, 0);
-        s.setRange (0.0, 1.0);
-        addAndMakeVisible (s);
-    }
-
     addAndMakeVisible (oscComponent);
+
+    addAndMakeVisible (visualizer);
 
     setSize (400, 300);
     setLookAndFeel (&laf);
@@ -107,9 +88,7 @@ void PluginTemplateEditor::resized()
         s.setBounds (row.removeFromLeft (sliderWidth));
 
 
-    for (auto& s : slider)
-        s.setBounds (bounds.removeFromLeft (sliderWidth));
-}
+    visualizer.setBounds (bounds);}
 
 
 void PluginTemplateEditor::timerCallback()
@@ -117,12 +96,14 @@ void PluginTemplateEditor::timerCallback()
     auto& sender = processorReference.getOSCSender();
 
     std::array<float, 5> values;
+
     for (size_t i = 0; i < 5; ++i)
     {
         const auto value = processorReference.rmsValues[i].load (std::memory_order_relaxed);
         values[i] = value;
-        slider[i].setValue (value);
     }
+
+    visualizer.setValues (values);
 
     if (sender.isConnected())
     {

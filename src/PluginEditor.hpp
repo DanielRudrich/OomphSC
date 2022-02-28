@@ -3,6 +3,8 @@
 #include "PluginProcessor.hpp"
 #include "OSCComponent.hpp"
 
+#include "Visualizer.hpp"
+
 //==============================================================================
 class PluginTemplateEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
@@ -33,7 +35,7 @@ private:
     std::array<std::unique_ptr<SliderAttachment>, 3> crossOverFrequenciesAttachments;
 
     // rms visuals
-    std::array<juce::Slider, 5> slider;
+    Visualizer visualizer;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateEditor)
