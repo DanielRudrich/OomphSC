@@ -103,6 +103,8 @@ PluginTemplateProcessor::PluginTemplateProcessor()
 
     for (auto& e : rmsValues)
         e.store (0.0f, std::memory_order_relaxed);
+
+    startTimer (50);
 }
 
 PluginTemplateProcessor::~PluginTemplateProcessor()
@@ -296,6 +298,18 @@ void PluginTemplateProcessor::parameterChanged (const juce::String& parameterID,
     else if (parameterID == Parameters::LevelCalculationType::id)
         for (auto& e : rms)
             e.setLevelCalculationType (BallisticsFilterLevelCalculationType (newValue));
+}
+
+void PluginTemplateProcessor::timerCallback()
+{
+    if (oscSender.isConnected())
+    {
+        oscSender.send ({ "/rms/full/", rmsValues[4].load (std::memory_order_relaxed) });
+
+        for (size_t i = 0; i < Settings::numBands; ++i)
+            oscSender.send ({ "/rms/band/" + juce::String (i) + "/",
+                              rmsValues[i].load (std::memory_order_relaxed) });
+    }
 }
 
 //==============================================================================

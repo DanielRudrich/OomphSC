@@ -111,20 +111,11 @@ void PluginTemplateEditor::resized()
 
 void PluginTemplateEditor::timerCallback()
 {
-    auto& sender = processorReference.getOSCSender();
-
     std::array<float, 5> values;
     for (size_t i = 0; i < 5; ++i)
     {
         const auto value = processorReference.rmsValues[i].load (std::memory_order_relaxed);
         values[i] = value;
         slider[i].setValue (value);
-    }
-
-    if (sender.isConnected())
-    {
-        sender.send ({ "/rms/full/", values[4] });
-        for (int i = 0; i < Settings::numBands; ++i)
-            sender.send ({ "/rms/band/" + juce::String (i) + "/", values[(size_t) i] });
     }
 }

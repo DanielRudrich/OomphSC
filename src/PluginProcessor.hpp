@@ -52,6 +52,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
+    void timerCallback() override;
 
     std::array<std::atomic<float>, Settings::numRMS> rmsValues;
 
