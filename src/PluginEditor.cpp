@@ -1,7 +1,7 @@
 #include "PluginEditor.hpp"
 
 //==============================================================================
-PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
+OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     AudioProcessorEditor (&p),
     laf (juce::LookAndFeel_V4::getLightColourScheme()),
     processorReference (p),
@@ -61,13 +61,13 @@ PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
     startTimerHz (50);
 }
 
-PluginTemplateEditor::~PluginTemplateEditor()
+OomphSCEditor::~OomphSCEditor()
 {
     setLookAndFeel (nullptr);
 }
 
 //==============================================================================
-void PluginTemplateEditor::paint (juce::Graphics& g)
+void OomphSCEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::white);
 
@@ -85,7 +85,7 @@ void PluginTemplateEditor::paint (juce::Graphics& g)
     g.drawText (versionString, getLocalBounds(), juce::Justification::bottomRight);
 }
 
-void PluginTemplateEditor::resized()
+void OomphSCEditor::resized()
 {
     auto bounds = getLocalBounds().reduced (12);
 
@@ -109,7 +109,7 @@ void PluginTemplateEditor::resized()
         s.setBounds (bounds.removeFromLeft (sliderWidth));
 }
 
-void PluginTemplateEditor::timerCallback()
+void OomphSCEditor::timerCallback()
 {
     std::array<float, 5> values;
     for (size_t i = 0; i < 5; ++i)

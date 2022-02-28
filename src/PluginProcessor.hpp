@@ -9,14 +9,14 @@
 //==============================================================================
 /**
 */
-class PluginTemplateProcessor : public juce::AudioProcessor,
-                                public juce::AudioProcessorValueTreeState::Listener,
-                                public juce::Timer
+class OomphSCProcessor : public juce::AudioProcessor,
+                         public juce::AudioProcessorValueTreeState::Listener,
+                         public juce::Timer
 {
 public:
     //==============================================================================
-    PluginTemplateProcessor();
-    ~PluginTemplateProcessor() override;
+    OomphSCProcessor();
+    ~OomphSCProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -70,5 +70,5 @@ private:
     std::array<CrossOver, Settings::numCrossOvers> crossOvers;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OomphSCProcessor)
 };
