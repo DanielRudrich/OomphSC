@@ -4,7 +4,6 @@
 
 #include <JuceHeader.h>
 
-
 class IpAndPortComponent : public juce::Component
 {
     static constexpr int portWidth = 50;
@@ -20,13 +19,13 @@ public:
 
     IpAndPortComponent()
     {
-        juce::Colour emptyColour {110, 110, 110};
+        juce::Colour emptyColour { 110, 110, 110 };
         ip.setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
         ip.setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
         ip.setColour (juce::TextEditor::focusedOutlineColourId, juce::Colours::transparentBlack);
         ip.setJustification (juce::Justification::centred);
         ip.setTextToShowWhenEmpty ("IP Address", emptyColour);
-        ip.onReturnKey = [this] () { returnKeyPressed(); };
+        ip.onReturnKey = [this]() { returnKeyPressed(); };
         addAndMakeVisible (ip);
 
         port.setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
@@ -35,13 +34,11 @@ public:
         port.setJustification (juce::Justification::centred);
         port.setInputRestrictions (5, "0123456789");
         port.setTextToShowWhenEmpty ("Port", emptyColour);
-        port.onReturnKey = [this] () { returnKeyPressed(); };
+        port.onReturnKey = [this]() { returnKeyPressed(); };
         addAndMakeVisible (port);
     }
 
-
     ~IpAndPortComponent() override = default;
-
 
     void paint (juce::Graphics& g) override
     {
@@ -50,7 +47,7 @@ public:
         switch (state)
         {
             case State::disconnected:
-                g.setColour ({110, 110, 110});
+                g.setColour ({ 110, 110, 110 });
                 break;
             case State::connected:
                 g.setColour (juce::Colours::limegreen);
@@ -65,7 +62,7 @@ public:
         bounds.removeFromRight (portWidth);
         auto b = bounds.removeFromRight (spacing);
 
-        g.setColour ({110, 110, 110});
+        g.setColour ({ 110, 110, 110 });
         g.drawText (":", b, juce::Justification::centred);
     }
 
@@ -77,27 +74,13 @@ public:
         ip.setBounds (bounds);
     }
 
+    void setIP (const juce::String& ipToSet) { ip.setText (ipToSet); }
 
-    void setIP (const juce::String& ipToSet)
-    {
-        ip.setText (ipToSet);
-    }
+    juce::String getIP() const { return ip.getText(); }
 
-    juce::String getIP() const
-    {
-        return ip.getText();
-    }
+    void setPort (int portToSet) { port.setText (portToSet == -1 ? "" : juce::String (portToSet)); }
 
-
-    void setPort (int portToSet)
-    {
-        port.setText (portToSet == -1 ? "" : juce::String (portToSet));
-    }
-
-    int getPort() const
-    {
-        return port.getText().getIntValue();
-    }
+    int getPort() const { return port.getText().getIntValue(); }
 
     void setState (State newState)
     {

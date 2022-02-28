@@ -13,45 +13,49 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
 
-    params.push_back (std::make_unique<APF> (Parameters::CrossOver1::id,
-                                             Parameters::CrossOver1::name,
-                                             NormalisableRange<float> (Parameters::CrossOver1::min,
-                                                                       Parameters::CrossOver1::max, 1.0f,
-                                                                       Parameters::CrossOver1::skew),
-                                             Parameters::CrossOver1::defaultValue,
-                                             Parameters::CrossOver1::unit));
+    params.push_back (
+        std::make_unique<APF> (Parameters::CrossOver1::id,
+                               Parameters::CrossOver1::name,
+                               NormalisableRange<float> (Parameters::CrossOver1::min,
+                                                         Parameters::CrossOver1::max,
+                                                         1.0f,
+                                                         Parameters::CrossOver1::skew),
+                               Parameters::CrossOver1::defaultValue,
+                               Parameters::CrossOver1::unit));
 
-    params.push_back (std::make_unique<APF> (Parameters::CrossOver2::id,
-                                             Parameters::CrossOver2::name,
-                                             NormalisableRange<float> (Parameters::CrossOver2::min,
-                                                                       Parameters::CrossOver2::max, 1.0f,
-                                                                       Parameters::CrossOver2::skew),
-                                             Parameters::CrossOver2::defaultValue,
-                                             Parameters::CrossOver2::unit));
+    params.push_back (
+        std::make_unique<APF> (Parameters::CrossOver2::id,
+                               Parameters::CrossOver2::name,
+                               NormalisableRange<float> (Parameters::CrossOver2::min,
+                                                         Parameters::CrossOver2::max,
+                                                         1.0f,
+                                                         Parameters::CrossOver2::skew),
+                               Parameters::CrossOver2::defaultValue,
+                               Parameters::CrossOver2::unit));
 
-    params.push_back (std::make_unique<APF> (Parameters::CrossOver3::id,
-                                             Parameters::CrossOver3::name,
-                                             NormalisableRange<float> (Parameters::CrossOver3::min,
-                                                                       Parameters::CrossOver3::max, 1.0f,
-                                                                       Parameters::CrossOver3::skew),
-                                             Parameters::CrossOver3::defaultValue,
-                                             Parameters::CrossOver3::unit));
+    params.push_back (
+        std::make_unique<APF> (Parameters::CrossOver3::id,
+                               Parameters::CrossOver3::name,
+                               NormalisableRange<float> (Parameters::CrossOver3::min,
+                                                         Parameters::CrossOver3::max,
+                                                         1.0f,
+                                                         Parameters::CrossOver3::skew),
+                               Parameters::CrossOver3::defaultValue,
+                               Parameters::CrossOver3::unit));
 
-    params.push_back (std::make_unique<APF> (Parameters::Attack::id,
-                                             Parameters::Attack::name,
-                                             NormalisableRange<float> (Parameters::Attack::min,
-                                                                       Parameters::Attack::max, 1.0f),
-                                             Parameters::Attack::defaultValue,
-                                             Parameters::Attack::unit));
+    params.push_back (std::make_unique<APF> (
+        Parameters::Attack::id,
+        Parameters::Attack::name,
+        NormalisableRange<float> (Parameters::Attack::min, Parameters::Attack::max, 1.0f),
+        Parameters::Attack::defaultValue,
+        Parameters::Attack::unit));
 
-
-    params.push_back (std::make_unique<APF> (Parameters::Release::id,
-                                             Parameters::Release::name,
-                                             NormalisableRange<float> (Parameters::Release::min,
-                                                                       Parameters::Release::max, 1.0f),
-                                             Parameters::Release::defaultValue,
-                                             Parameters::Release::unit));
-
+    params.push_back (std::make_unique<APF> (
+        Parameters::Release::id,
+        Parameters::Release::name,
+        NormalisableRange<float> (Parameters::Release::min, Parameters::Release::max, 1.0f),
+        Parameters::Release::defaultValue,
+        Parameters::Release::unit));
 
     params.push_back (std::make_unique<APC> (Parameters::LevelCalculationType::id,
                                              Parameters::LevelCalculationType::name,
@@ -174,7 +178,7 @@ void PluginTemplateProcessor::changeProgramName (int index, const juce::String& 
 //==============================================================================
 void PluginTemplateProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    juce::dsp::ProcessSpec specs {sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1};
+    juce::dsp::ProcessSpec specs { sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1 };
 
     for (auto& e : rms)
         e.prepare (specs);
@@ -267,7 +271,7 @@ void PluginTemplateProcessor::setStateInformation (const void* data, int sizeInB
         }
 }
 
-void PluginTemplateProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void PluginTemplateProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     using namespace juce::dsp;
     using namespace Settings;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "PluginProcessor.hpp"
 #include "OSCComponent.hpp"
+#include "PluginProcessor.hpp"
 
 //==============================================================================
 class PluginTemplateEditor : public juce::AudioProcessorEditor, private juce::Timer
@@ -15,9 +15,9 @@ public:
     void resized() override;
 
     void timerCallback() override;
-    
+
 private:
-    juce::LookAndFeel_V4 laf; 
+    juce::LookAndFeel_V4 laf;
     PluginTemplateProcessor& processorReference;
     OSCComponent oscComponent;
 
@@ -34,7 +34,6 @@ private:
 
     // rms visuals
     std::array<juce::Slider, 5> slider;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateEditor)
 };
