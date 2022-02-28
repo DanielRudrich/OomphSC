@@ -13,45 +13,49 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
 
-    params.push_back (std::make_unique<APF> (Parameters::CrossOver1::id,
-                                             Parameters::CrossOver1::name,
-                                             NormalisableRange<float> (Parameters::CrossOver1::min,
-                                                                       Parameters::CrossOver1::max, 1.0f,
-                                                                       Parameters::CrossOver1::skew),
-                                             Parameters::CrossOver1::defaultValue,
-                                             Parameters::CrossOver1::unit));
+    params.push_back (
+        std::make_unique<APF> (Parameters::CrossOver1::id,
+                               Parameters::CrossOver1::name,
+                               NormalisableRange<float> (Parameters::CrossOver1::min,
+                                                         Parameters::CrossOver1::max,
+                                                         1.0f,
+                                                         Parameters::CrossOver1::skew),
+                               Parameters::CrossOver1::defaultValue,
+                               Parameters::CrossOver1::unit));
 
-    params.push_back (std::make_unique<APF> (Parameters::CrossOver2::id,
-                                             Parameters::CrossOver2::name,
-                                             NormalisableRange<float> (Parameters::CrossOver2::min,
-                                                                       Parameters::CrossOver2::max, 1.0f,
-                                                                       Parameters::CrossOver2::skew),
-                                             Parameters::CrossOver2::defaultValue,
-                                             Parameters::CrossOver2::unit));
+    params.push_back (
+        std::make_unique<APF> (Parameters::CrossOver2::id,
+                               Parameters::CrossOver2::name,
+                               NormalisableRange<float> (Parameters::CrossOver2::min,
+                                                         Parameters::CrossOver2::max,
+                                                         1.0f,
+                                                         Parameters::CrossOver2::skew),
+                               Parameters::CrossOver2::defaultValue,
+                               Parameters::CrossOver2::unit));
 
-    params.push_back (std::make_unique<APF> (Parameters::CrossOver3::id,
-                                             Parameters::CrossOver3::name,
-                                             NormalisableRange<float> (Parameters::CrossOver3::min,
-                                                                       Parameters::CrossOver3::max, 1.0f,
-                                                                       Parameters::CrossOver3::skew),
-                                             Parameters::CrossOver3::defaultValue,
-                                             Parameters::CrossOver3::unit));
+    params.push_back (
+        std::make_unique<APF> (Parameters::CrossOver3::id,
+                               Parameters::CrossOver3::name,
+                               NormalisableRange<float> (Parameters::CrossOver3::min,
+                                                         Parameters::CrossOver3::max,
+                                                         1.0f,
+                                                         Parameters::CrossOver3::skew),
+                               Parameters::CrossOver3::defaultValue,
+                               Parameters::CrossOver3::unit));
 
-    params.push_back (std::make_unique<APF> (Parameters::Attack::id,
-                                             Parameters::Attack::name,
-                                             NormalisableRange<float> (Parameters::Attack::min,
-                                                                       Parameters::Attack::max, 1.0f),
-                                             Parameters::Attack::defaultValue,
-                                             Parameters::Attack::unit));
+    params.push_back (std::make_unique<APF> (
+        Parameters::Attack::id,
+        Parameters::Attack::name,
+        NormalisableRange<float> (Parameters::Attack::min, Parameters::Attack::max, 1.0f),
+        Parameters::Attack::defaultValue,
+        Parameters::Attack::unit));
 
-
-    params.push_back (std::make_unique<APF> (Parameters::Release::id,
-                                             Parameters::Release::name,
-                                             NormalisableRange<float> (Parameters::Release::min,
-                                                                       Parameters::Release::max, 1.0f),
-                                             Parameters::Release::defaultValue,
-                                             Parameters::Release::unit));
-
+    params.push_back (std::make_unique<APF> (
+        Parameters::Release::id,
+        Parameters::Release::name,
+        NormalisableRange<float> (Parameters::Release::min, Parameters::Release::max, 1.0f),
+        Parameters::Release::defaultValue,
+        Parameters::Release::unit));
 
     params.push_back (std::make_unique<APC> (Parameters::LevelCalculationType::id,
                                              Parameters::LevelCalculationType::name,
@@ -62,7 +66,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 }
 
 //==============================================================================
-PluginTemplateProcessor::PluginTemplateProcessor()
+OomphSCProcessor::OomphSCProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     :
     AudioProcessor (BusesProperties()
@@ -99,19 +103,21 @@ PluginTemplateProcessor::PluginTemplateProcessor()
 
     for (auto& e : rmsValues)
         e.store (0.0f, std::memory_order_relaxed);
+
+    startTimer (50);
 }
 
-PluginTemplateProcessor::~PluginTemplateProcessor()
+OomphSCProcessor::~OomphSCProcessor()
 {
 }
 
 //==============================================================================
-const juce::String PluginTemplateProcessor::getName() const
+const juce::String OomphSCProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool PluginTemplateProcessor::acceptsMidi() const
+bool OomphSCProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
     return true;
@@ -120,7 +126,7 @@ bool PluginTemplateProcessor::acceptsMidi() const
 #endif
 }
 
-bool PluginTemplateProcessor::producesMidi() const
+bool OomphSCProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
     return true;
@@ -129,7 +135,7 @@ bool PluginTemplateProcessor::producesMidi() const
 #endif
 }
 
-bool PluginTemplateProcessor::isMidiEffect() const
+bool OomphSCProcessor::isMidiEffect() const
 {
 #if JucePlugin_IsMidiEffect
     return true;
@@ -138,43 +144,43 @@ bool PluginTemplateProcessor::isMidiEffect() const
 #endif
 }
 
-double PluginTemplateProcessor::getTailLengthSeconds() const
+double OomphSCProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int PluginTemplateProcessor::getNumPrograms()
+int OomphSCProcessor::getNumPrograms()
 {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
         // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int PluginTemplateProcessor::getCurrentProgram()
+int OomphSCProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void PluginTemplateProcessor::setCurrentProgram (int index)
+void OomphSCProcessor::setCurrentProgram (int index)
 {
     juce::ignoreUnused (index);
 }
 
-const juce::String PluginTemplateProcessor::getProgramName (int index)
+const juce::String OomphSCProcessor::getProgramName (int index)
 {
     juce::ignoreUnused (index);
     return {};
 }
 
-void PluginTemplateProcessor::changeProgramName (int index, const juce::String& newName)
+void OomphSCProcessor::changeProgramName (int index, const juce::String& newName)
 {
     juce::ignoreUnused (index);
     juce::ignoreUnused (newName);
 }
 
 //==============================================================================
-void PluginTemplateProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void OomphSCProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    juce::dsp::ProcessSpec specs {sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1};
+    juce::dsp::ProcessSpec specs { sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1 };
 
     for (auto& e : rms)
         e.prepare (specs);
@@ -183,20 +189,20 @@ void PluginTemplateProcessor::prepareToPlay (double sampleRate, int samplesPerBl
         e.prepare (specs);
 }
 
-void PluginTemplateProcessor::releaseResources()
+void OomphSCProcessor::releaseResources()
 {
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool PluginTemplateProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool OomphSCProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     juce::ignoreUnused (layouts);
     return true;
 }
 #endif
 
-void PluginTemplateProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-                                            juce::MidiBuffer& midiMessages)
+void OomphSCProcessor::processBlock (juce::AudioBuffer<float>& buffer,
+                                     juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
 
@@ -228,18 +234,18 @@ void PluginTemplateProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 }
 
 //==============================================================================
-bool PluginTemplateProcessor::hasEditor() const
+bool OomphSCProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* PluginTemplateProcessor::createEditor()
+juce::AudioProcessorEditor* OomphSCProcessor::createEditor()
 {
-    return new PluginTemplateEditor (*this);
+    return new OomphSCEditor (*this);
 }
 
 //==============================================================================
-void PluginTemplateProcessor::getStateInformation (juce::MemoryBlock& destData)
+void OomphSCProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = params.copyState();
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
@@ -248,7 +254,7 @@ void PluginTemplateProcessor::getStateInformation (juce::MemoryBlock& destData)
     copyXmlToBinary (*xml, destData);
 }
 
-void PluginTemplateProcessor::setStateInformation (const void* data, int sizeInBytes)
+void OomphSCProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
@@ -267,7 +273,7 @@ void PluginTemplateProcessor::setStateInformation (const void* data, int sizeInB
         }
 }
 
-void PluginTemplateProcessor::parameterChanged (const juce::String &parameterID, float newValue)
+void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     using namespace juce::dsp;
     using namespace Settings;
@@ -294,9 +300,21 @@ void PluginTemplateProcessor::parameterChanged (const juce::String &parameterID,
             e.setLevelCalculationType (BallisticsFilterLevelCalculationType (newValue));
 }
 
+void OomphSCProcessor::timerCallback()
+{
+    if (oscSender.isConnected())
+    {
+        oscSender.send ({ "/rms/full/", rmsValues[4].load (std::memory_order_relaxed) });
+
+        for (size_t i = 0; i < Settings::numBands; ++i)
+            oscSender.send ({ "/rms/band/" + juce::String (i) + "/",
+                              rmsValues[i].load (std::memory_order_relaxed) });
+    }
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new PluginTemplateProcessor();
+    return new OomphSCProcessor();
 }
