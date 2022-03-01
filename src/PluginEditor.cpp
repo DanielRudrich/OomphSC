@@ -3,7 +3,8 @@
 
 //==============================================================================
 PluginTemplateEditor::PluginTemplateEditor (PluginTemplateProcessor& p) :
-    AudioProcessorEditor (&p), laf (juce::LookAndFeel_V4::getLightColourScheme()), processorReference (p), oscComponent (processorReference.getOSCSender())
+    AudioProcessorEditor (&p), laf (juce::LookAndFeel_V4::getLightColourScheme()), processorReference (p), oscComponent (processorReference.getOSCSender()),
+visualizer (processorReference.getAPVTS())
 {
     using namespace juce;
 

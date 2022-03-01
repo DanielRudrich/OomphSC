@@ -11,16 +11,26 @@
 class Separator : public juce::Component
 {
 public:
-    Separator (juce::ComponentBoundsConstrainer& constrainerToUse) : constrainer (constrainerToUse)
+    Separator (juce::ComponentBoundsConstrainer& constrainerToUse, juce::RangedAudioParameter& param) : constrainer (constrainerToUse),
+    attachment (param, [&] (float value) { parameterChanged (value); })
     {
+        attachment.sendInitialUpdate();
     }
+
     ~Separator() override = default;
 
     void paint (juce::Graphics& g) override
     {
         constexpr auto height = 20.0f;
+        const auto mouseOver = isMouseOverOrDragging();
 
-        g.setColour (juce::Colours::black.withAlpha (isMouseOver() ? 0.6f : 0.2f));
+        if (mouseOver)
+        {
+            g.setColour (juce::Colours::black.withAlpha (0.1f));
+            g.fillAll();
+        }
+
+        g.setColour (juce::Colours::black.withAlpha (mouseOver ? 0.6f : 0.2f));
 
         auto bounds = getLocalBounds();
         auto centre = bounds.getCentre().toFloat();
@@ -44,16 +54,48 @@ public:
     void mouseDown (const juce::MouseEvent& e) override
     {
         dragger.startDraggingComponent (this, e);
+        attachment.beginGesture();
     }
 
     void mouseDrag (const juce::MouseEvent& e) override
     {
         dragger.dragComponent (this, e, &constrainer);
+        auto xPos = getBoundsInParent().getCentreX();
+        attachment.setValueAsPartOfGesture (xToFrequency (xPos));
     }
+
+    void mouseUp ([[maybe_unused]] const juce::MouseEvent& e) override
+    {
+        attachment.endGesture();
+    }
+
+    void parameterChanged (float value)
+    {
+        auto bounds = getLocalBounds();
+        auto c = bounds.getCentre();
+
+        c.x = frequencyToX (value);
+
+        setCentrePosition (c);
+    }
+
+    int frequencyToX (float frequencyInHz)
+    {
+        const auto w = getParentWidth();
+        return static_cast<int> (w * (std::log (frequencyInHz / 20.0f) / std::log (20'000.0f / 20.0f)));
+    }
+
+    float xToFrequency (int xPosition)
+    {
+        const auto w = getParentWidth();
+        return 20.0f * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w);
+    }
+
 
 private:
     juce::ComponentBoundsConstrainer& constrainer;
     juce::ComponentDragger dragger;
+    juce::ParameterAttachment attachment;
 };
 
 class Bar : public juce::Component
@@ -98,7 +140,7 @@ private:
 class Visualizer : public juce::Component
 {
 public:
-    Visualizer()
+    Visualizer (juce::AudioProcessorValueTreeState& params)
     {
         const std::array<juce::Colour, Settings::numRMS> colours = { juce::Colours::cornflowerblue,
                                                                      juce::Colours::limegreen,
@@ -114,11 +156,16 @@ public:
         }
 
         separators.reserve (Settings::numBands - 1);
-        for (int i = 0; i < Settings::numBands - 1; ++i)
-        {
-            separators.push_back (std::make_unique<Separator> (constrainer));
-            addAndMakeVisible (*separators.back());
-        }
+
+        separators.push_back (std::make_unique<Separator> (constrainer, *params.getParameter (Settings::Parameters::CrossOver1::id)));
+        addAndMakeVisible (*separators.back());
+
+        separators.push_back (std::make_unique<Separator> (constrainer, *params.getParameter (Settings::Parameters::CrossOver2::id)));
+        addAndMakeVisible (*separators.back());
+
+        separators.push_back (std::make_unique<Separator> (constrainer, *params.getParameter (Settings::Parameters::CrossOver3::id)));
+        addAndMakeVisible (*separators.back());
+
 
         constrainer.setMinimumOnscreenAmounts (0xffffff, 0xffffff, 0xffffff, 0xffffff);
     }
