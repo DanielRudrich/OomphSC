@@ -52,6 +52,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
+
     void timerCallback() override;
 
     std::array<std::atomic<float>, Settings::numRMS> rmsValues;
@@ -60,8 +61,12 @@ public:
 
     juce::AudioProcessorValueTreeState& getAPVTS() { return params; }
 
+    void updateCrossovers();
+
 private:
     juce::AudioProcessorValueTreeState params;
+    std::array<std::atomic<float>*, Settings::numCrossOvers> crossOver;
+
     OSCSenderPlus oscSender;
 
     std::array<juce::dsp::BallisticsFilter<float>, Settings::numRMS> rms;
