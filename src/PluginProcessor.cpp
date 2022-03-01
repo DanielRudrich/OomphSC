@@ -1,7 +1,7 @@
 #include "PluginProcessor.hpp"
 #include "PluginEditor.hpp"
-
 #include "Settings.hpp"
+#include <algorithm>
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -100,6 +100,10 @@ OomphSCProcessor::OomphSCProcessor()
     params.addParameterListener (Parameters::Attack::id, this);
     params.addParameterListener (Parameters::Release::id, this);
     params.addParameterListener (Parameters::LevelCalculationType::id, this);
+
+    crossOver[0] = params.getRawParameterValue (Parameters::CrossOver1::id);
+    crossOver[1] = params.getRawParameterValue (Parameters::CrossOver2::id);
+    crossOver[2] = params.getRawParameterValue (Parameters::CrossOver3::id);
 
     for (auto& e : rmsValues)
         e.store (0.0f, std::memory_order_relaxed);
@@ -273,19 +277,26 @@ void OomphSCProcessor::setStateInformation (const void* data, int sizeInBytes)
         }
 }
 
+void OomphSCProcessor::updateCrossovers()
+{
+    std::array<float, Settings::numCrossOvers> frequencies;
+    for (size_t i = 0; i < Settings::numCrossOvers; ++i)
+        frequencies[i] = crossOver[i]->load (std::memory_order_relaxed);
+
+    std::sort (frequencies.begin(), frequencies.end());
+
+    for (size_t i = 0; i < Settings::numCrossOvers; ++i)
+        crossOvers[i].setCutoffFrequency (frequencies[i]);
+}
+
 void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     using namespace juce::dsp;
     using namespace Settings;
 
-    if (parameterID == Parameters::CrossOver1::id)
-        crossOvers[0].setCutoffFrequency (newValue);
-
-    else if (parameterID == Parameters::CrossOver2::id)
-        crossOvers[1].setCutoffFrequency (newValue);
-
-    else if (parameterID == Parameters::CrossOver3::id)
-        crossOvers[2].setCutoffFrequency (newValue);
+    if (parameterID == Parameters::CrossOver1::id || parameterID == Parameters::CrossOver2::id
+        || parameterID == Parameters::CrossOver3::id)
+        updateCrossovers();
 
     else if (parameterID == Parameters::Attack::id)
         for (auto& e : rms)
