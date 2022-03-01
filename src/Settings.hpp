@@ -16,7 +16,6 @@ struct OSC
 
 struct Parameters
 {
-
     struct CrossOver1
     {
         static inline juce::String id = "crossOver1";
@@ -74,11 +73,8 @@ struct Parameters
     {
         static inline juce::String id = "levelCalculation";
         static inline juce::String name = "Level Calculation Type";
-        static inline juce::StringArray choices = {"Peak", "RMS"};
+        static inline juce::StringArray choices = { "Peak", "RMS" };
         static constexpr int defaultValue = 0;
     };
-
-
-
 };
-}
+} // namespace Settings

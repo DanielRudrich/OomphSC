@@ -3,13 +3,14 @@
 #include <JuceHeader.h>
 #include <array>
 
-#include "Settings.hpp"
 #include "OSCSenderPlus.hpp"
+#include "Settings.hpp"
 
 //==============================================================================
 /**
 */
-class PluginTemplateProcessor : public juce::AudioProcessor, public juce::AudioProcessorValueTreeState::Listener
+class PluginTemplateProcessor : public juce::AudioProcessor,
+                                public juce::AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -49,18 +50,17 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    void parameterChanged (const juce::String &parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     std::array<std::atomic<float>, Settings::numRMS> rmsValues;
 
     OSCSenderPlus& getOSCSender() { return oscSender; }
 
     juce::AudioProcessorValueTreeState& getAPVTS() { return params; }
-    
+
 private:
     juce::AudioProcessorValueTreeState params;
     OSCSenderPlus oscSender;
-
 
     std::array<juce::dsp::BallisticsFilter<float>, Settings::numRMS> rms;
 

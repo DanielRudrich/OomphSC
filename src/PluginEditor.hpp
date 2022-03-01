@@ -1,7 +1,7 @@
 #pragma once
 
-#include "PluginProcessor.hpp"
 #include "OSCComponent.hpp"
+#include "PluginProcessor.hpp"
 
 #include "Visualizer.hpp"
 
@@ -17,9 +17,9 @@ public:
     void resized() override;
 
     void timerCallback() override;
-    
+
 private:
-    juce::LookAndFeel_V4 laf; 
+    juce::LookAndFeel_V4 laf;
     PluginTemplateProcessor& processorReference;
     OSCComponent oscComponent;
 
@@ -36,7 +36,6 @@ private:
 
     // rms visuals
     Visualizer visualizer;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateEditor)
 };

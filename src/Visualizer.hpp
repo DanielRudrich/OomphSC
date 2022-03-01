@@ -11,8 +11,10 @@
 class Separator : public juce::Component
 {
 public:
-    Separator (juce::ComponentBoundsConstrainer& constrainerToUse, juce::RangedAudioParameter& param) : constrainer (constrainerToUse),
-    attachment (param, [&] (float value) { parameterChanged (value); })
+    Separator (juce::ComponentBoundsConstrainer& constrainerToUse,
+               juce::RangedAudioParameter& param) :
+        constrainer (constrainerToUse),
+        attachment (param, [&] (float value) { parameterChanged (value); })
     {
         attachment.sendInitialUpdate();
     }
@@ -64,12 +66,9 @@ public:
         attachment.setValueAsPartOfGesture (xToFrequency (xPos));
     }
 
-    void mouseUp ([[maybe_unused]] const juce::MouseEvent& e) override
-    {
-        attachment.endGesture();
-    }
+    void mouseUp ([[maybe_unused]] const juce::MouseEvent& e) override { attachment.endGesture(); }
 
-    void parameterChanged (float value)
+    void parameterChanged (float value) noexcept
     {
         auto bounds = getLocalBounds();
         auto c = bounds.getCentre();
@@ -79,18 +78,18 @@ public:
         setCentrePosition (c);
     }
 
-    int frequencyToX (float frequencyInHz)
+    int frequencyToX (float frequencyInHz) const noexcept
     {
         const auto w = getParentWidth();
-        return static_cast<int> (w * (std::log (frequencyInHz / 20.0f) / std::log (20'000.0f / 20.0f)));
+        return static_cast<int> (
+            w * (std::log (frequencyInHz / 20.0f) / std::log (20'000.0f / 20.0f)));
     }
 
-    float xToFrequency (int xPosition)
+    float xToFrequency (int xPosition) const noexcept
     {
         const auto w = getParentWidth();
         return 20.0f * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w);
     }
-
 
 private:
     juce::ComponentBoundsConstrainer& constrainer;
@@ -157,15 +156,20 @@ public:
 
         separators.reserve (Settings::numBands - 1);
 
-        separators.push_back (std::make_unique<Separator> (constrainer, *params.getParameter (Settings::Parameters::CrossOver1::id)));
+        separators.push_back (std::make_unique<Separator> (
+            constrainer,
+            *params.getParameter (Settings::Parameters::CrossOver1::id)));
         addAndMakeVisible (*separators.back());
 
-        separators.push_back (std::make_unique<Separator> (constrainer, *params.getParameter (Settings::Parameters::CrossOver2::id)));
+        separators.push_back (std::make_unique<Separator> (
+            constrainer,
+            *params.getParameter (Settings::Parameters::CrossOver2::id)));
         addAndMakeVisible (*separators.back());
 
-        separators.push_back (std::make_unique<Separator> (constrainer, *params.getParameter (Settings::Parameters::CrossOver3::id)));
+        separators.push_back (std::make_unique<Separator> (
+            constrainer,
+            *params.getParameter (Settings::Parameters::CrossOver3::id)));
         addAndMakeVisible (*separators.back());
-
 
         constrainer.setMinimumOnscreenAmounts (0xffffff, 0xffffff, 0xffffff, 0xffffff);
     }
