@@ -73,6 +73,8 @@ public:
 
     void parameterChanged (float value) noexcept
     {
+        frequency = value;
+
         auto bounds = getLocalBounds();
         auto c = bounds.getCentre();
 
@@ -94,7 +96,10 @@ public:
         return 20.0f * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w);
     }
 
+    float getFrequency() const noexcept { return frequency; }
+
 private:
+    float frequency = 0.0f;
     juce::ComponentBoundsConstrainer& constrainer;
     juce::ComponentDragger dragger;
     juce::ParameterAttachment attachment;
@@ -143,6 +148,8 @@ class Visualizer : public juce::Component, public juce::ComponentListener
 {
     static constexpr float relativeFullBandWidth = 0.14f;
     static constexpr int separatorWidth = 7;
+    static constexpr int textRowHeight = 20;
+
 public:
     Visualizer (juce::AudioProcessorValueTreeState& params)
     {
@@ -182,6 +189,9 @@ public:
         }
 
         constrainer.setMinimumOnscreenAmounts (0xffffff, 0xffffff, 0xffffff, 0xffffff);
+
+        for (auto& f : frequencies)
+            f.setColour (juce::Colours::black);
     }
 
     ~Visualizer() override = default;
@@ -189,6 +199,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
+        bounds.removeFromBottom (textRowHeight);
 
         const auto offset = static_cast<int> (relativeFullBandWidth * getWidth());
 
@@ -199,7 +210,7 @@ public:
 
         for (auto& c : separators)
         {
-            c->setSize (separatorWidth, getHeight());
+            c->setSize (separatorWidth, bounds.getHeight());
             c->init();
         }
     }
@@ -221,7 +232,19 @@ public:
 
         std::array<int, Settings::numBands> xPositions;
         for (size_t i = 0; i < Settings::numBands - 1; ++i)
+        {
             xPositions[i] = separators[i]->getPosition().x;
+
+            // labels
+            frequencies[i].setText (
+                juce::String (juce::roundToInt (separators[i]->getFrequency())));
+
+            // TODO: use Font.getStringWidth to get the width
+            
+            frequencies[i].setOriginWithOriginalSize (
+                { static_cast<float> (barsParent.getPosition().getX() + xPositions[i]),
+                  static_cast<float> (getHeight() - textRowHeight) });
+        }
 
         xPositions[Settings::numBands - 1] = getWidth();
 
@@ -231,9 +254,17 @@ public:
 
         for (size_t i = 0; i < Settings::numBands; ++i)
         {
-            bars[i].setBounds (xLast, 0, xPositions[i] - xLast, getHeight());
+            bars[i].setBounds (xLast, 0, xPositions[i] - xLast, getHeight() - textRowHeight);
             xLast = xPositions[i] + separatorWidth; // magic number alert!
         }
+
+        repaint();
+    }
+
+    void paint (juce::Graphics& g) override
+    {
+        for (auto& f : frequencies)
+            f.draw (g, 1.0f);
     }
 
 private:
@@ -243,4 +274,6 @@ private:
     Component barsParent;
     std::array<Bar, Settings::numBands> bars;
     std::vector<std::unique_ptr<Separator>> separators;
+
+    std::array<juce::DrawableText, Settings::numBands - 1> frequencies;
 };
