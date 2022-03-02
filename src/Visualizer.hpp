@@ -46,12 +46,14 @@ public:
     {
         juce::ignoreUnused (e);
         repaint();
+        setMouseCursor (juce::MouseCursor::LeftRightResizeCursor);
     }
 
     void mouseExit (const juce::MouseEvent& e) override
     {
         juce::ignoreUnused (e);
         repaint();
+        setMouseCursor (juce::MouseCursor::NormalCursor);
     }
 
     void mouseDown (const juce::MouseEvent& e) override
