@@ -32,7 +32,7 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
 
     addAndMakeVisible (visualizer);
 
-    setSize (500, 300);
+    setSize (450, 300);
     setLookAndFeel (&laf);
     startTimerHz (50);
 }

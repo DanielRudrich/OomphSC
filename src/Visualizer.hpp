@@ -141,6 +141,8 @@ private:
 
 class Visualizer : public juce::Component, public juce::ComponentListener
 {
+    static constexpr float relativeFullBandWidth = 0.14f;
+    static constexpr int separatorWidth = 7;
 public:
     Visualizer (juce::AudioProcessorValueTreeState& params)
     {
@@ -150,12 +152,16 @@ public:
                                                                      juce::Colours::orangered,
                                                                      juce::Colours::black };
 
+        fullBandBar.setColour (colours[Settings::numBands]);
+        addAndMakeVisible (fullBandBar);
+
         for (size_t i = 0; i < Settings::numBands; ++i)
         {
             auto& b = bars[i];
             b.setColour (colours[i]);
-            addAndMakeVisible (b);
+            barsParent.addAndMakeVisible (b);
         }
+        addAndMakeVisible (barsParent);
 
         separators.reserve (Settings::numBands - 1);
 
@@ -171,7 +177,7 @@ public:
 
         for (auto& c : separators)
         {
-            addAndMakeVisible (*c);
+            barsParent.addAndMakeVisible (*c);
             c->addComponentListener (this);
         }
 
@@ -182,9 +188,18 @@ public:
 
     void resized() override
     {
+        auto bounds = getLocalBounds();
+
+        const auto offset = static_cast<int> (relativeFullBandWidth * getWidth());
+
+        fullBandBar.setBounds (bounds.removeFromLeft (offset));
+        bounds.removeFromLeft (2 * separatorWidth);
+
+        barsParent.setBounds (bounds);
+
         for (auto& c : separators)
         {
-            c->setSize (7, getHeight());
+            c->setSize (separatorWidth, getHeight());
             c->init();
         }
     }
@@ -193,6 +208,8 @@ public:
     {
         for (size_t i = 0; i < Settings::numBands; ++i)
             bars[i].setValue (valuesToSet[i]);
+
+        fullBandBar.setValue (valuesToSet[Settings::numBands]);
     }
 
     void componentMovedOrResized ([[maybe_unused]] juce::Component& component,
@@ -215,13 +232,15 @@ public:
         for (size_t i = 0; i < Settings::numBands; ++i)
         {
             bars[i].setBounds (xLast, 0, xPositions[i] - xLast, getHeight());
-            xLast = xPositions[i] + 7; // magic number alert!
+            xLast = xPositions[i] + separatorWidth; // magic number alert!
         }
     }
 
 private:
     juce::ComponentBoundsConstrainer constrainer;
 
+    Bar fullBandBar;
+    Component barsParent;
     std::array<Bar, Settings::numBands> bars;
     std::vector<std::unique_ptr<Separator>> separators;
 };
