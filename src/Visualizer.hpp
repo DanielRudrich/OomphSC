@@ -18,9 +18,9 @@ public:
     {
     }
 
-    void init() { attachment.sendInitialUpdate(); }
-
     ~Separator() override = default;
+
+    void init() { attachment.sendInitialUpdate(); }
 
     void paint (juce::Graphics& g) override
     {

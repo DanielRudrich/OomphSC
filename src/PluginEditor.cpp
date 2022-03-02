@@ -28,22 +28,11 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
                                   Settings::Parameters::CrossOver2::id,
                                   Settings::Parameters::CrossOver3::id);
 
-    for (size_t i = 0; i < Settings::numCrossOvers; ++i)
-    {
-        auto& s = crossOverFrequencies[i];
-        s.setSliderStyle (Slider::LinearBar);
-        s.setTextValueSuffix (" Hz");
-        addAndMakeVisible (s);
-
-        crossOverFrequenciesAttachments[i] =
-            std::make_unique<SliderAttachment> (params, ids[(int) i], s);
-    }
-
     addAndMakeVisible (oscComponent);
 
     addAndMakeVisible (visualizer);
 
-    setSize (400, 300);
+    setSize (500, 300);
     setLookAndFeel (&laf);
     startTimerHz (50);
 }
@@ -77,20 +66,13 @@ void OomphSCEditor::resized()
     auto bounds = getLocalBounds().reduced (12);
 
     bounds.removeFromTop (50);
-    oscComponent.setBounds (bounds.removeFromTop (40));
-    bounds.removeFromTop (20);
 
-    const auto sliderWidth = bounds.getWidth() / 5;
+    const auto sliderWidth = 80;
 
-    auto row = bounds.removeFromTop (20);
-    row.removeFromLeft (sliderWidth / 2);
-    attack.setBounds (row.removeFromLeft (2 * sliderWidth));
-    release.setBounds (row.removeFromLeft (2 * sliderWidth));
-
-    row = bounds.removeFromTop (20);
-    row.removeFromLeft (sliderWidth / 2);
-    for (auto& s : crossOverFrequencies)
-        s.setBounds (row.removeFromLeft (sliderWidth));
+    auto row = bounds.removeFromTop (40);
+    attack.setBounds (row.removeFromLeft (sliderWidth).reduced (5));
+    release.setBounds (row.removeFromLeft (sliderWidth).reduced (5));
+    oscComponent.setBounds (row);
 
     visualizer.setBounds (bounds);
 }
