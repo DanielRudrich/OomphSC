@@ -16,9 +16,14 @@ public:
         constrainer (constrainerToUse),
         attachment (param, [&] (float value) { parameterChanged (value); })
     {
-        attachment.sendInitialUpdate();
+
     }
 
+    void init()
+    {
+        attachment.sendInitialUpdate();
+    }
+    
     ~Separator() override = default;
 
     void paint (juce::Graphics& g) override
@@ -136,7 +141,7 @@ private:
     float value = 0.0f;
 };
 
-class Visualizer : public juce::Component
+class Visualizer : public juce::Component, public juce::ComponentListener
 {
 public:
     Visualizer (juce::AudioProcessorValueTreeState& params)
@@ -159,17 +164,18 @@ public:
         separators.push_back (std::make_unique<Separator> (
             constrainer,
             *params.getParameter (Settings::Parameters::CrossOver1::id)));
-        addAndMakeVisible (*separators.back());
-
         separators.push_back (std::make_unique<Separator> (
             constrainer,
             *params.getParameter (Settings::Parameters::CrossOver2::id)));
-        addAndMakeVisible (*separators.back());
-
         separators.push_back (std::make_unique<Separator> (
             constrainer,
             *params.getParameter (Settings::Parameters::CrossOver3::id)));
-        addAndMakeVisible (*separators.back());
+
+        for (auto& c : separators)
+        {
+            addAndMakeVisible (*c);
+            c->addComponentListener (this);
+        }
 
         constrainer.setMinimumOnscreenAmounts (0xffffff, 0xffffff, 0xffffff, 0xffffff);
     }
@@ -178,17 +184,10 @@ public:
 
     void resized() override
     {
-        auto bounds = getLocalBounds();
-        constexpr int spacing = 7;
-        auto width = (bounds.getWidth() - (Settings::numBands - 1) * spacing) / Settings::numBands;
-
-        for (size_t i = 0; i < Settings::numBands; ++i)
+        for (auto& c : separators)
         {
-            auto& b = bars[i];
-            b.setBounds (bounds.removeFromLeft (width));
-
-            if (i < Settings::numBands - 1)
-                separators[i]->setBounds (bounds.removeFromLeft (spacing));
+            c->setSize (7, getHeight());
+            c->init();
         }
     }
 
@@ -196,6 +195,28 @@ public:
     {
         for (size_t i = 0; i < Settings::numBands; ++i)
             bars[i].setValue (valuesToSet[i]);
+    }
+
+    void componentMovedOrResized ([[maybe_unused]] juce::Component &component, bool wasMoved, [[maybe_unused]] bool wasResized) override
+    {
+        if (! wasMoved)
+            return;
+
+        std::array<int, Settings::numBands> xPositions;
+        for (size_t i = 0; i < Settings::numBands - 1; ++i)
+            xPositions[i] = separators[i]->getPosition().x;
+
+        xPositions[Settings::numBands - 1] = getWidth();
+
+        std::sort (xPositions.begin(), xPositions.end());
+
+        int xLast = 0;
+
+        for (size_t i = 0; i < Settings::numBands; ++i)
+        {
+            bars[i].setBounds (xLast, 0, xPositions[i] - xLast, getHeight());
+            xLast = xPositions[i] + 7; // magic number alert!
+        }
     }
 
 private:
