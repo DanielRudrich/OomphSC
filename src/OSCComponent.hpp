@@ -6,13 +6,11 @@
 
 #include <JuceHeader.h>
 
-#include "OSCSenderPlus.hpp"
 #include "IpAndPortComponent.hpp"
-
+#include "OSCSenderPlus.hpp"
 
 class OSCComponent : public juce::Component
 {
-
 public:
     OSCComponent (OSCSenderPlus& o) : oscSender (o)
     {
@@ -22,7 +20,7 @@ public:
         addAndMakeVisible (ipAndPort);
 
         updateButtonText();
-        connectButton.onClick = [&] () { toggleConnection(); };
+        connectButton.onClick = [&]() { toggleConnection(); };
         addAndMakeVisible (connectButton);
     }
 
@@ -38,7 +36,8 @@ public:
         else
             connect();
 
-        ipAndPort.setState (oscSender.isConnected() ? IpAndPortComponent::State::connected : IpAndPortComponent::State::disconnected);
+        ipAndPort.setState (oscSender.isConnected() ? IpAndPortComponent::State::connected
+                                                    : IpAndPortComponent::State::disconnected);
         updateButtonText();
     }
 
@@ -60,7 +59,6 @@ public:
         ipAndPort.setBounds (bounds);
     }
 
-
 private:
     void updateButtonText()
     {
@@ -72,4 +70,3 @@ private:
     IpAndPortComponent ipAndPort;
     juce::TextButton connectButton;
 };
-

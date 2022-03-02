@@ -1,7 +1,7 @@
 #include "PluginProcessor.hpp"
 #include "PluginEditor.hpp"
-
 #include "Settings.hpp"
+#include <algorithm>
 
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -66,7 +66,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 }
 
 //==============================================================================
-PluginTemplateProcessor::PluginTemplateProcessor()
+OomphSCProcessor::OomphSCProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     :
     AudioProcessor (BusesProperties()
@@ -101,21 +101,27 @@ PluginTemplateProcessor::PluginTemplateProcessor()
     params.addParameterListener (Parameters::Release::id, this);
     params.addParameterListener (Parameters::LevelCalculationType::id, this);
 
+    crossOver[0] = params.getRawParameterValue (Parameters::CrossOver1::id);
+    crossOver[1] = params.getRawParameterValue (Parameters::CrossOver2::id);
+    crossOver[2] = params.getRawParameterValue (Parameters::CrossOver3::id);
+
     for (auto& e : rmsValues)
         e.store (0.0f, std::memory_order_relaxed);
+
+    startTimer (50);
 }
 
-PluginTemplateProcessor::~PluginTemplateProcessor()
+OomphSCProcessor::~OomphSCProcessor()
 {
 }
 
 //==============================================================================
-const juce::String PluginTemplateProcessor::getName() const
+const juce::String OomphSCProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool PluginTemplateProcessor::acceptsMidi() const
+bool OomphSCProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
     return true;
@@ -124,7 +130,7 @@ bool PluginTemplateProcessor::acceptsMidi() const
 #endif
 }
 
-bool PluginTemplateProcessor::producesMidi() const
+bool OomphSCProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
     return true;
@@ -133,7 +139,7 @@ bool PluginTemplateProcessor::producesMidi() const
 #endif
 }
 
-bool PluginTemplateProcessor::isMidiEffect() const
+bool OomphSCProcessor::isMidiEffect() const
 {
 #if JucePlugin_IsMidiEffect
     return true;
@@ -142,41 +148,41 @@ bool PluginTemplateProcessor::isMidiEffect() const
 #endif
 }
 
-double PluginTemplateProcessor::getTailLengthSeconds() const
+double OomphSCProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int PluginTemplateProcessor::getNumPrograms()
+int OomphSCProcessor::getNumPrograms()
 {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
         // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int PluginTemplateProcessor::getCurrentProgram()
+int OomphSCProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void PluginTemplateProcessor::setCurrentProgram (int index)
+void OomphSCProcessor::setCurrentProgram (int index)
 {
     juce::ignoreUnused (index);
 }
 
-const juce::String PluginTemplateProcessor::getProgramName (int index)
+const juce::String OomphSCProcessor::getProgramName (int index)
 {
     juce::ignoreUnused (index);
     return {};
 }
 
-void PluginTemplateProcessor::changeProgramName (int index, const juce::String& newName)
+void OomphSCProcessor::changeProgramName (int index, const juce::String& newName)
 {
     juce::ignoreUnused (index);
     juce::ignoreUnused (newName);
 }
 
 //==============================================================================
-void PluginTemplateProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void OomphSCProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     juce::dsp::ProcessSpec specs { sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1 };
 
@@ -187,20 +193,20 @@ void PluginTemplateProcessor::prepareToPlay (double sampleRate, int samplesPerBl
         e.prepare (specs);
 }
 
-void PluginTemplateProcessor::releaseResources()
+void OomphSCProcessor::releaseResources()
 {
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool PluginTemplateProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool OomphSCProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     juce::ignoreUnused (layouts);
     return true;
 }
 #endif
 
-void PluginTemplateProcessor::processBlock (juce::AudioBuffer<float>& buffer,
-                                            juce::MidiBuffer& midiMessages)
+void OomphSCProcessor::processBlock (juce::AudioBuffer<float>& buffer,
+                                     juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
 
@@ -232,18 +238,18 @@ void PluginTemplateProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 }
 
 //==============================================================================
-bool PluginTemplateProcessor::hasEditor() const
+bool OomphSCProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* PluginTemplateProcessor::createEditor()
+juce::AudioProcessorEditor* OomphSCProcessor::createEditor()
 {
-    return new PluginTemplateEditor (*this);
+    return new OomphSCEditor (*this);
 }
 
 //==============================================================================
-void PluginTemplateProcessor::getStateInformation (juce::MemoryBlock& destData)
+void OomphSCProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = params.copyState();
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
@@ -252,7 +258,7 @@ void PluginTemplateProcessor::getStateInformation (juce::MemoryBlock& destData)
     copyXmlToBinary (*xml, destData);
 }
 
-void PluginTemplateProcessor::setStateInformation (const void* data, int sizeInBytes)
+void OomphSCProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
@@ -271,19 +277,26 @@ void PluginTemplateProcessor::setStateInformation (const void* data, int sizeInB
         }
 }
 
-void PluginTemplateProcessor::parameterChanged (const juce::String& parameterID, float newValue)
+void OomphSCProcessor::updateCrossovers()
+{
+    std::array<float, Settings::numCrossOvers> frequencies;
+    for (size_t i = 0; i < Settings::numCrossOvers; ++i)
+        frequencies[i] = crossOver[i]->load (std::memory_order_relaxed);
+
+    std::sort (frequencies.begin(), frequencies.end());
+
+    for (size_t i = 0; i < Settings::numCrossOvers; ++i)
+        crossOvers[i].setCutoffFrequency (frequencies[i]);
+}
+
+void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     using namespace juce::dsp;
     using namespace Settings;
 
-    if (parameterID == Parameters::CrossOver1::id)
-        crossOvers[0].setCutoffFrequency (newValue);
-
-    else if (parameterID == Parameters::CrossOver2::id)
-        crossOvers[1].setCutoffFrequency (newValue);
-
-    else if (parameterID == Parameters::CrossOver3::id)
-        crossOvers[2].setCutoffFrequency (newValue);
+    if (parameterID == Parameters::CrossOver1::id || parameterID == Parameters::CrossOver2::id
+        || parameterID == Parameters::CrossOver3::id)
+        updateCrossovers();
 
     else if (parameterID == Parameters::Attack::id)
         for (auto& e : rms)
@@ -298,9 +311,21 @@ void PluginTemplateProcessor::parameterChanged (const juce::String& parameterID,
             e.setLevelCalculationType (BallisticsFilterLevelCalculationType (newValue));
 }
 
+void OomphSCProcessor::timerCallback()
+{
+    if (oscSender.isConnected())
+    {
+        oscSender.send ({ "/rms/full/", rmsValues[4].load (std::memory_order_relaxed) });
+
+        for (size_t i = 0; i < Settings::numBands; ++i)
+            oscSender.send ({ "/rms/band/" + juce::String (i) + "/",
+                              rmsValues[i].load (std::memory_order_relaxed) });
+    }
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new PluginTemplateProcessor();
+    return new OomphSCProcessor();
 }

@@ -16,14 +16,10 @@ public:
         constrainer (constrainerToUse),
         attachment (param, [&] (float value) { parameterChanged (value); })
     {
-
     }
 
-    void init()
-    {
-        attachment.sendInitialUpdate();
-    }
-    
+    void init() { attachment.sendInitialUpdate(); }
+
     ~Separator() override = default;
 
     void paint (juce::Graphics& g) override
@@ -197,7 +193,9 @@ public:
             bars[i].setValue (valuesToSet[i]);
     }
 
-    void componentMovedOrResized ([[maybe_unused]] juce::Component &component, bool wasMoved, [[maybe_unused]] bool wasResized) override
+    void componentMovedOrResized ([[maybe_unused]] juce::Component& component,
+                                  bool wasMoved,
+                                  [[maybe_unused]] bool wasResized) override
     {
         if (! wasMoved)
             return;

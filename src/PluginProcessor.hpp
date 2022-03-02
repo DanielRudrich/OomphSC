@@ -9,13 +9,15 @@
 //==============================================================================
 /**
 */
-class PluginTemplateProcessor : public juce::AudioProcessor,
-                                public juce::AudioProcessorValueTreeState::Listener
+
+class OomphSCProcessor : public juce::AudioProcessor,
+                         public juce::AudioProcessorValueTreeState::Listener,
+                         public juce::Timer
 {
 public:
     //==============================================================================
-    PluginTemplateProcessor();
-    ~PluginTemplateProcessor() override;
+    OomphSCProcessor();
+    ~OomphSCProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -52,14 +54,20 @@ public:
 
     void parameterChanged (const juce::String& parameterID, float newValue) override;
 
+    void timerCallback() override;
+
     std::array<std::atomic<float>, Settings::numRMS> rmsValues;
 
     OSCSenderPlus& getOSCSender() { return oscSender; }
 
     juce::AudioProcessorValueTreeState& getAPVTS() { return params; }
 
+    void updateCrossovers();
+
 private:
     juce::AudioProcessorValueTreeState params;
+    std::array<std::atomic<float>*, Settings::numCrossOvers> crossOver;
+
     OSCSenderPlus oscSender;
 
     std::array<juce::dsp::BallisticsFilter<float>, Settings::numRMS> rms;
@@ -68,5 +76,5 @@ private:
     std::array<CrossOver, Settings::numCrossOvers> crossOvers;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginTemplateProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OomphSCProcessor)
 };
