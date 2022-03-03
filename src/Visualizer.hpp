@@ -73,33 +73,34 @@ public:
 
     void parameterChanged (float value) noexcept
     {
-        frequency = value;
+        const auto intValue = juce::roundToInt (value);
+        frequency = intValue;
 
         auto bounds = getLocalBounds();
         auto c = bounds.getCentre();
 
-        c.x = frequencyToX (value);
+        c.x = frequencyToX (intValue);
 
         setCentrePosition (c);
     }
 
-    int frequencyToX (float frequencyInHz) const noexcept
+    int frequencyToX (int frequencyInHz) const noexcept
     {
         const auto w = getParentWidth();
         return static_cast<int> (
             w * (std::log (frequencyInHz / 20.0f) / std::log (20'000.0f / 20.0f)));
     }
 
-    float xToFrequency (int xPosition) const noexcept
+    int xToFrequency (int xPosition) const noexcept
     {
         const auto w = getParentWidth();
-        return 20.0f * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w);
+        return juce::roundToInt (20 * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w));
     }
 
-    float getFrequency() const noexcept { return frequency; }
+    int getFrequency() const noexcept { return frequency; }
 
 private:
-    float frequency = 0.0f;
+    int frequency = 0;
     juce::ComponentBoundsConstrainer& constrainer;
     juce::ComponentDragger dragger;
     juce::ParameterAttachment attachment;
