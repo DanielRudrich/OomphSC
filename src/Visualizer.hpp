@@ -94,7 +94,8 @@ public:
     int xToFrequency (int xPosition) const noexcept
     {
         const auto w = getParentWidth();
-        return juce::roundToInt (20 * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w));
+        return juce::roundToInt (
+            20 * std::pow (20'000.0f / 20.0f, static_cast<float> (xPosition) / w));
     }
 
     int getFrequency() const noexcept { return frequency; }
@@ -192,7 +193,10 @@ public:
         constrainer.setMinimumOnscreenAmounts (0xffffff, 0xffffff, 0xffffff, 0xffffff);
 
         for (auto& f : frequencies)
-            f.setColour (juce::Colours::black);
+        {
+            f.setFontHeight (13);
+            f.setColour (juce::Colours::grey);
+        }
     }
 
     ~Visualizer() override = default;
@@ -231,20 +235,28 @@ public:
         if (! wasMoved)
             return;
 
+        const auto xOffset = barsParent.getPosition().getX();
+
         std::array<int, Settings::numBands> xPositions;
         for (size_t i = 0; i < Settings::numBands - 1; ++i)
         {
             xPositions[i] = separators[i]->getPosition().x;
 
             // labels
-            frequencies[i].setText (
-                juce::String (juce::roundToInt (separators[i]->getFrequency())));
+            const auto text = juce::String (separators[i]->getFrequency());
+            frequencies[i].setText (text);
+            const auto textWidth = frequencies[i].getFont().getStringWidth (text);
 
-            // TODO: use Font.getStringWidth to get the width
-            
-            frequencies[i].setOriginWithOriginalSize (
-                { static_cast<float> (barsParent.getPosition().getX() + xPositions[i]),
-                  static_cast<float> (getHeight() - textRowHeight) });
+            auto origin =
+                juce::Point<float> (xOffset + xPositions[i] - 0.5f * (textWidth - separatorWidth),
+                                    static_cast<float> (getHeight() - textRowHeight));
+
+            if (origin.x < xOffset)
+                origin.x = xOffset;
+            else if (auto excess = origin.x + textWidth - barsParent.getRight(); excess > 0)
+                origin.x -= excess;
+
+            frequencies[i].setOriginWithOriginalSize (origin);
         }
 
         xPositions[Settings::numBands - 1] = getWidth();
@@ -266,6 +278,14 @@ public:
     {
         for (auto& f : frequencies)
             f.draw (g, 1.0f);
+
+        g.setFont (12);
+        g.setColour (juce::Colours::grey);
+
+        auto bounds = getLocalBounds();
+        const auto offset = static_cast<int> (relativeFullBandWidth * getWidth());
+        bounds = bounds.removeFromBottom (textRowHeight);
+        g.drawText ("FULLBAND", bounds.removeFromLeft (offset), juce::Justification::centred);
     }
 
 private:
