@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+#include "Fonts.hpp"
 #include "Settings.hpp"
 
 class Separator : public juce::Component
@@ -194,8 +195,9 @@ public:
 
         for (auto& f : frequencies)
         {
-            f.setFontHeight (13);
-            f.setColour (juce::Colours::grey);
+            f.setFont (Fonts::getRegularFont(), true);
+            f.setFontHeight (15);
+            f.setColour (juce::Colours::black);
         }
     }
 
@@ -279,13 +281,14 @@ public:
         for (auto& f : frequencies)
             f.draw (g, 1.0f);
 
-        g.setFont (12);
-        g.setColour (juce::Colours::grey);
+        g.setFont (Fonts::getRegularFont());
+        g.setFont (15);
+        g.setColour (juce::Colours::black);
 
         auto bounds = getLocalBounds();
         const auto offset = static_cast<int> (relativeFullBandWidth * getWidth());
         bounds = bounds.removeFromBottom (textRowHeight);
-        g.drawText ("FULLBAND", bounds.removeFromLeft (offset), juce::Justification::centred);
+        g.drawText ("FULL", bounds.removeFromLeft (offset), juce::Justification::centred);
     }
 
 private:

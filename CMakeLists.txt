@@ -20,18 +20,22 @@ juce_add_plugin (OomphSC
     FORMATS VST3
     COPY_PLUGIN_AFTER_BUILD True)
 
+juce_add_binary_data (fonts
+    SOURCES "fonts/Montserrat-Regular.ttf")
+
 juce_generate_juce_header (OomphSC)
 
 
 target_sources (OomphSC PRIVATE
-    src/Settings.hpp
-    src/OSCComponent.hpp
-    src/OSCSenderPlus.hpp
-    src/PluginProcessor.hpp
-    src/PluginProcessor.cpp
-    src/PluginEditor.hpp
-    src/PluginEditor.cpp
-    src/Visualizer.hpp)
+    source/Settings.hpp
+    source/OSCComponent.hpp
+    source/OSCSenderPlus.hpp
+    source/PluginProcessor.hpp
+    source/PluginProcessor.cpp
+    source/PluginEditor.hpp
+    source/PluginEditor.cpp
+    source/Visualizer.hpp
+    source/Fonts.hpp)
 
 target_compile_definitions (OomphSC PUBLIC
     JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_gui_app` call
@@ -45,6 +49,7 @@ target_link_libraries (OomphSC
         juce::juce_audio_utils
         juce::juce_dsp
         juce::juce_osc
+        fonts
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
