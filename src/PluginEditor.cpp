@@ -63,18 +63,25 @@ void OomphSCEditor::paint (juce::Graphics& g)
 
 void OomphSCEditor::resized()
 {
-    auto bounds = getLocalBounds().reduced (12);
+    constexpr auto spacing = 10;
+    constexpr auto sliderWidth = 80;
+
+    auto bounds = getLocalBounds();
+    bounds.reduce (10, 10);
 
     bounds.removeFromTop (50);
 
-    const auto sliderWidth = 80;
+    visualizer.setBounds (bounds.removeFromBottom (140));
 
-    auto row = bounds.removeFromTop (40);
-    attack.setBounds (row.removeFromLeft (sliderWidth).reduced (5));
-    release.setBounds (row.removeFromLeft (sliderWidth).reduced (5));
+    bounds.removeFromBottom (2 * 7);
+    auto row = bounds.removeFromBottom (40);
+    row.removeFromLeft (sliderWidth); // peak control
+    row.removeFromLeft (spacing);
+    attack.setBounds (row.removeFromLeft (sliderWidth));
+    row.removeFromLeft (spacing);
+    release.setBounds (row.removeFromLeft (sliderWidth));
+    row.removeFromLeft (spacing);
     oscComponent.setBounds (row);
-
-    visualizer.setBounds (bounds);
 }
 
 void OomphSCEditor::timerCallback()

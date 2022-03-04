@@ -159,7 +159,7 @@ public:
                                                                      juce::Colours::limegreen,
                                                                      juce::Colours::orange,
                                                                      juce::Colours::orangered,
-                                                                     juce::Colours::black };
+                                                                     juce::Colour (0xFF414141)};
 
         fullBandBar.setColour (colours[Settings::numBands]);
         addAndMakeVisible (fullBandBar);
