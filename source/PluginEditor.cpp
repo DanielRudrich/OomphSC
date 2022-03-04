@@ -9,27 +9,22 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     oscComponent (processorReference.getOSCSender()),
     peakRMSButton (*processorReference.getAPVTS().getParameter (
         Settings::Parameters::LevelCalculationType::id)),
-    visualizer (processorReference.getAPVTS())
+    attack (*processorReference.getAPVTS().getParameter (Settings::Parameters::Attack::id),
+            juce::String ("ATTACK"),
+            juce::Colour (0xFF00C9FF)),
+    release (*processorReference.getAPVTS().getParameter (Settings::Parameters::Release::id),
+        juce::String ("RELEASE"),
+        juce::Colour (0xFF50E3C2)),
+        visualizer (processorReference.getAPVTS())
 {
     using namespace juce;
-    auto& params = processorReference.getAPVTS();
-
 
     // logo
     logo = juce::Drawable::createFromImageData (BinaryLogo::logo_svg, BinaryLogo::logo_svgSize);
 
+    // controls
     addAndMakeVisible (peakRMSButton);
-
-    attack.setSliderStyle (Slider::LinearBar);
-    attackAttachment =
-        std::make_unique<SliderAttachment> (params, Settings::Parameters::Attack::id, attack);
-    attack.setTextValueSuffix (" ms Attack");
     addAndMakeVisible (attack);
-
-    release.setSliderStyle (Slider::LinearBar);
-    releaseAttachment =
-        std::make_unique<SliderAttachment> (params, Settings::Parameters::Release::id, release);
-    release.setTextValueSuffix (" ms Release");
     addAndMakeVisible (release);
 
     auto ids = juce::StringArray (Settings::Parameters::CrossOver1::id,
@@ -37,7 +32,6 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
                                   Settings::Parameters::CrossOver3::id);
 
     addAndMakeVisible (oscComponent);
-
     addAndMakeVisible (visualizer);
 
     setSize (450, 300);
@@ -55,7 +49,10 @@ void OomphSCEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::white);
 
-    logo->drawWithin (g, getLocalBounds().removeFromTop (74).toFloat(), juce::RectanglePlacement::centred | juce::RectanglePlacement::doNotResize, 1.0f);
+    logo->drawWithin (g,
+                      getLocalBounds().removeFromTop (74).toFloat(),
+                      juce::RectanglePlacement::centred | juce::RectanglePlacement::doNotResize,
+                      1.0f);
 
     juce::String versionString = "";
 #if JUCE_DEBUG
