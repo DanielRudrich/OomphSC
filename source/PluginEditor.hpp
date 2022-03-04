@@ -1,8 +1,8 @@
 #pragma once
 
 #include "OSCComponent.hpp"
+#include "PeakRMSButton.hpp"
 #include "PluginProcessor.hpp"
-
 #include "Visualizer.hpp"
 
 //==============================================================================
@@ -26,11 +26,12 @@ private:
     // parameter controls
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 
+    PeakRMSButton peakRMSButton;
+
     juce::Slider attack;
     std::unique_ptr<SliderAttachment> attackAttachment;
     juce::Slider release;
     std::unique_ptr<SliderAttachment> releaseAttachment;
-
 
     // rms visuals
     Visualizer visualizer;

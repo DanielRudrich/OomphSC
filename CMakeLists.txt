@@ -35,6 +35,7 @@ target_sources (OomphSC PRIVATE
     source/PluginEditor.hpp
     source/PluginEditor.cpp
     source/Visualizer.hpp
+    source/PeakRMSButton.hpp
     source/Fonts.hpp)
 
 target_compile_definitions (OomphSC PUBLIC

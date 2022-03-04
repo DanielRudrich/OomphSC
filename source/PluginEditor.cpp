@@ -6,11 +6,15 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     laf (juce::LookAndFeel_V4::getLightColourScheme()),
     processorReference (p),
     oscComponent (processorReference.getOSCSender()),
+    peakRMSButton (*processorReference.getAPVTS().getParameter (
+        Settings::Parameters::LevelCalculationType::id)),
     visualizer (processorReference.getAPVTS())
 {
     using namespace juce;
 
     auto& params = processorReference.getAPVTS();
+
+    addAndMakeVisible (peakRMSButton);
 
     attack.setSliderStyle (Slider::LinearBar);
     attackAttachment =
@@ -75,7 +79,7 @@ void OomphSCEditor::resized()
 
     bounds.removeFromBottom (2 * 7);
     auto row = bounds.removeFromBottom (40);
-    row.removeFromLeft (sliderWidth); // peak control
+    peakRMSButton.setBounds (row.removeFromLeft (sliderWidth));
     row.removeFromLeft (spacing);
     attack.setBounds (row.removeFromLeft (sliderWidth));
     row.removeFromLeft (spacing);
