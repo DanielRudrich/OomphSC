@@ -23,6 +23,8 @@ private:
     OomphSCProcessor& processorReference;
     OSCComponent oscComponent;
 
+    std::unique_ptr<juce::Drawable> logo;
+
     // parameter controls
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
 

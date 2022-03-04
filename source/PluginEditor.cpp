@@ -1,4 +1,5 @@
 #include "PluginEditor.hpp"
+#include <BinaryLogo.hpp>
 
 //==============================================================================
 OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
@@ -11,8 +12,11 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     visualizer (processorReference.getAPVTS())
 {
     using namespace juce;
-
     auto& params = processorReference.getAPVTS();
+
+
+    // logo
+    logo = juce::Drawable::createFromImageData (BinaryLogo::logo_svg, BinaryLogo::logo_svgSize);
 
     addAndMakeVisible (peakRMSButton);
 
@@ -51,6 +55,8 @@ void OomphSCEditor::paint (juce::Graphics& g)
 {
     g.fillAll (juce::Colours::white);
 
+    logo->drawWithin (g, getLocalBounds().removeFromTop (74).toFloat(), juce::RectanglePlacement::centred | juce::RectanglePlacement::doNotResize, 1.0f);
+
     juce::String versionString = "";
 #if JUCE_DEBUG
     versionString = "DEBUG - ";
@@ -58,9 +64,7 @@ void OomphSCEditor::paint (juce::Graphics& g)
     versionString.append (ProjectInfo::versionString, 30);
 
     g.setColour (juce::Colours::black);
-    g.setFont (30);
-    g.drawText ("OomphSC", getLocalBounds().removeFromTop (50), juce::Justification::centred);
-
+    g.setFont (Fonts::getRegularFont());
     g.setFont (12);
     g.drawText (versionString, getLocalBounds(), juce::Justification::bottomRight);
 }
@@ -86,6 +90,8 @@ void OomphSCEditor::resized()
     release.setBounds (row.removeFromLeft (sliderWidth));
     row.removeFromLeft (spacing);
     oscComponent.setBounds (row);
+
+    logo->setBounds (bounds);
 }
 
 void OomphSCEditor::timerCallback()

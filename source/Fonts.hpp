@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <BinaryData.h>
+#include <BinaryFonts.hpp>
 #include <JuceHeader.h>
 
 struct Fonts
@@ -10,8 +10,8 @@ struct Fonts
     {
         // I know... static variable in a plug-in... let's see if it blows up
         static auto font =
-            juce::Typeface::createSystemTypefaceFor (BinaryData::MontserratRegular_ttf,
-                                                     BinaryData::MontserratRegular_ttfSize);
+            juce::Typeface::createSystemTypefaceFor (BinaryFonts::MontserratRegular_ttf,
+                                                     BinaryFonts::MontserratRegular_ttfSize);
         return font;
     }
 };

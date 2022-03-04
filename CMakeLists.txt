@@ -21,7 +21,14 @@ juce_add_plugin (OomphSC
     COPY_PLUGIN_AFTER_BUILD True)
 
 juce_add_binary_data (fonts
+    HEADER_NAME "BinaryFonts.hpp"
+    NAMESPACE "BinaryFonts"
     SOURCES "fonts/Montserrat-Regular.ttf")
+
+juce_add_binary_data (logo
+    HEADER_NAME "BinaryLogo.hpp"
+    NAMESPACE "BinaryLogo"
+    SOURCES "logo/logo.svg")
 
 juce_generate_juce_header (OomphSC)
 
@@ -51,6 +58,7 @@ target_link_libraries (OomphSC
         juce::juce_dsp
         juce::juce_osc
         fonts
+        logo
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
