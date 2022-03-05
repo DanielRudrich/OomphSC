@@ -315,11 +315,15 @@ void OomphSCProcessor::timerCallback()
 {
     if (oscSender.isConnected())
     {
-        oscSender.send ({ "/rms/full/", rmsValues[4].load (std::memory_order_relaxed) });
+        auto success =
+            oscSender.send ({ "/rms/full/", rmsValues[4].load (std::memory_order_relaxed) });
 
         for (size_t i = 0; i < Settings::numBands; ++i)
             oscSender.send ({ "/rms/band/" + juce::String (i) + "/",
                               rmsValues[i].load (std::memory_order_relaxed) });
+
+        if (! success)
+            DBG ("Send failed");
     }
 }
 
