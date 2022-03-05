@@ -69,7 +69,7 @@ void OomphSCEditor::paint (juce::Graphics& g)
 void OomphSCEditor::resized()
 {
     constexpr auto spacing = 10;
-    constexpr auto sliderWidth = 80;
+    constexpr auto sliderWidth = 70;
 
     auto bounds = getLocalBounds();
     bounds.reduce (10, 10);
