@@ -4,7 +4,6 @@
 //==============================================================================
 OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     AudioProcessorEditor (&p),
-    laf (juce::LookAndFeel_V4::getLightColourScheme()),
     processorReference (p),
     oscComponent (processorReference.getOSCSender()),
     peakRMSButton (*processorReference.getAPVTS().getParameter (
@@ -13,9 +12,9 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
             juce::String ("ATTACK"),
             juce::Colour (0xFF00C9FF)),
     release (*processorReference.getAPVTS().getParameter (Settings::Parameters::Release::id),
-        juce::String ("RELEASE"),
-        juce::Colour (0xFF50E3C2)),
-        visualizer (processorReference.getAPVTS())
+             juce::String ("RELEASE"),
+             juce::Colour (0xFF50E3C2)),
+    visualizer (processorReference.getAPVTS())
 {
     using namespace juce;
 
@@ -35,14 +34,10 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     addAndMakeVisible (visualizer);
 
     setSize (450, 300);
-    setLookAndFeel (&laf);
     startTimerHz (50);
 }
 
-OomphSCEditor::~OomphSCEditor()
-{
-    setLookAndFeel (nullptr);
-}
+OomphSCEditor::~OomphSCEditor() = default;
 
 //==============================================================================
 void OomphSCEditor::paint (juce::Graphics& g)

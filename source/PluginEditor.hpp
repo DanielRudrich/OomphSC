@@ -20,7 +20,6 @@ public:
     void timerCallback() override;
 
 private:
-    juce::LookAndFeel_V4 laf;
     OomphSCProcessor& processorReference;
     OSCComponent oscComponent;
 
