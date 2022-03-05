@@ -20,8 +20,6 @@ public:
         addAndMakeVisible (ipAndPort);
 
         updateButtonText();
-        connectButton.onClick = [&]() { toggleConnection(); };
-        addAndMakeVisible (connectButton);
     }
 
     ~OSCComponent() override = default;
@@ -53,20 +51,20 @@ public:
 
     void resized() override
     {
-        auto bounds = getLocalBounds().reduced (5);
-        connectButton.setBounds (bounds.removeFromRight (80));
-        bounds.removeFromRight (5);
+        auto bounds = getLocalBounds();
         ipAndPort.setBounds (bounds);
     }
 
 private:
     void updateButtonText()
     {
-        connectButton.setButtonText (oscSender.isConnected() ? "disconnect" : "connect");
+        if (oscSender.isConnected())
+            DBG ("connected");
+        else
+            DBG ("not connected");
     }
 
     OSCSenderPlus& oscSender;
 
     IpAndPortComponent ipAndPort;
-    juce::TextButton connectButton;
 };

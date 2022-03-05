@@ -36,6 +36,7 @@ juce_generate_juce_header (OomphSC)
 target_sources (OomphSC PRIVATE
     source/Settings.hpp
     source/OSCComponent.hpp
+    source/IpAndPortComponent.hpp
     source/OSCSenderPlus.hpp
     source/PluginProcessor.hpp
     source/PluginProcessor.cpp
