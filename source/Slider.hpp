@@ -59,6 +59,58 @@ public:
         attachment.endGesture();
     }
 
+    void mouseDoubleClick ([[maybe_unused]] const juce::MouseEvent& event) override
+    {
+        if (! editor)
+        {
+            auto bounds = juce::Rectangle<int> (0, 0, getWidth(), getHeight() / 2);
+            auto value = juce::roundToInt (parameter.convertFrom0to1 (parameter.getValue()));
+            auto textValue = juce::String (value);
+
+            editor = std::make_unique<juce::TextEditor>();
+            editor->setBounds (bounds);
+            editor->setKeyboardType (juce::TextInputTarget::VirtualKeyboardType::decimalKeyboard);
+            editor->setText (textValue);
+            editor->setFont (Fonts::getRegularFont());
+            editor->setJustification (juce::Justification::centred);
+            editor->setColour (juce::TextEditor::backgroundColourId,
+                               juce::Colours::white.overlaidWith (colour.withAlpha (0.1f)));
+            editor->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+            editor->setColour (juce::TextEditor::highlightedTextColourId, juce::Colours::black);
+            editor->setColour (juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
+            editor->setColour (juce::TextEditor::focusedOutlineColourId,
+                               juce::Colours::transparentBlack);
+
+            addAndMakeVisible (*editor);
+
+            editor->grabKeyboardFocus();
+            editor->setHighlightedRegion (juce::Range<int> (0, textValue.length()));
+
+            editor->onReturnKey = [&]()
+            {
+                const auto newValue = static_cast<float> (editor->getText().getIntValue());
+                attachment.setValueAsCompleteGesture (newValue);
+                hideEditor();
+            };
+
+            editor->onEscapeKey = [&]() { hideEditor(); };
+            editor->onFocusLost = [&]() { hideEditor(); };
+
+            enterModalState (false);
+        }
+    }
+
+    void inputAttemptWhenModal() override { hideEditor(); }
+
+    void hideEditor()
+    {
+        if (editor)
+        {
+            editor.reset();
+            exitModalState (0);
+        }
+    }
+
     void parameterChanged (float value) noexcept
     {
         normalizedValue = parameter.convertTo0to1 (value);
@@ -73,5 +125,6 @@ private:
     float normalizedValue = 0.0f;
     float mouseDownValue;
 
+    std::unique_ptr<juce::TextEditor> editor;
     juce::ParameterAttachment attachment;
 };
