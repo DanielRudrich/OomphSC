@@ -40,9 +40,23 @@ public:
         g.drawText (text, textBounds, juce::Justification::centredBottom);
     }
 
+    void mouseDown ([[maybe_unused]] const juce::MouseEvent& e) override
+    {
+        mouseDownValue = normalizedValue;
+        attachment.beginGesture();
+    }
+
+    void mouseDrag (const juce::MouseEvent& e) override
+    {
+        auto diff = (e.position.x - e.mouseDownPosition.x) + (e.mouseDownPosition.y - e.position.y);
+
+        normalizedValue = std::clamp (mouseDownValue + 0.004f * diff, 0.0f, 1.0f);
+        attachment.setValueAsPartOfGesture (parameter.convertFrom0to1 (normalizedValue));
+    }
+
     void mouseUp ([[maybe_unused]] const juce::MouseEvent& event) override
     {
-        //        attachment.setValueAsCompleteGesture (! usesRMS);
+        attachment.endGesture();
     }
 
     void parameterChanged (float value) noexcept
@@ -57,6 +71,7 @@ private:
     juce::Colour colour;
 
     float normalizedValue = 0.0f;
+    float mouseDownValue;
 
     juce::ParameterAttachment attachment;
 };
