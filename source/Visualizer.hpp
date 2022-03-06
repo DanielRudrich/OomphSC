@@ -282,8 +282,7 @@ public:
         for (auto& f : frequencies)
             f.draw (g, 1.0f);
 
-        g.setFont (Fonts::getRegularFont());
-        g.setFont (15);
+        g.setFont (Fonts::getRegularFont (15));
         g.setColour (juce::Colours::black);
 
         auto bounds = getLocalBounds();

@@ -52,6 +52,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
+        bounds.removeFromRight (40);
         ipAndPort.setBounds (bounds);
     }
 

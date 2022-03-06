@@ -14,4 +14,11 @@ struct Fonts
                                                      BinaryFonts::MontserratRegular_ttfSize);
         return font;
     }
+
+    static juce::Font getRegularFont (float fontHeight)
+    {
+        juce::Font font (getRegularFont());
+        font.setHeight (fontHeight);
+        return font;
+    }
 };

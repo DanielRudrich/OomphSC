@@ -62,8 +62,7 @@ public:
         g.setColour (activeColour);
         g.strokePath (*activePath, juce::PathStrokeType (3.0f), activePath->getTransformToScaleToFit (graphicBounds, false));
 
-        g.setFont (Fonts::getRegularFont());
-        g.setFont (15);
+        g.setFont (Fonts::getRegularFont (15));
         g.setColour (juce::Colours::black);
         g.drawText (parameterLabel, textBounds, juce::Justification::centredBottom);
     }
