@@ -71,10 +71,10 @@ void OomphSCEditor::resized()
 
     bounds.removeFromTop (50);
 
-    visualizer.setBounds (bounds.removeFromBottom (140));
+    visualizer.setBounds (bounds.removeFromBottom (160));
 
     bounds.removeFromBottom (2 * 7);
-    auto row = bounds.removeFromBottom (40);
+    auto row = bounds.removeFromBottom (42);
     peakRMSButton.setBounds (row.removeFromLeft (sliderWidth));
     row.removeFromLeft (spacing);
     attack.setBounds (row.removeFromLeft (sliderWidth));
