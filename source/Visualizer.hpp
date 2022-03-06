@@ -88,7 +88,7 @@ public:
     int frequencyToX (int frequencyInHz) const noexcept
     {
         const auto w = getParentWidth();
-        return static_cast<int> (
+        return juce::roundToInt (
             w * (std::log (frequencyInHz / 20.0f) / std::log (20'000.0f / 20.0f)));
     }
 
@@ -147,7 +147,7 @@ private:
     float value = 0.0f;
 };
 
-class Visualizer : public juce::Component, public juce::ComponentListener
+class Visualizer : public juce::Component, public juce::AudioProcessorValueTreeState::Listener
 {
     static constexpr float relativeFullBandWidth = 0.14f;
     static constexpr int separatorWidth = 7;
@@ -160,7 +160,7 @@ public:
                                                                      juce::Colours::limegreen,
                                                                      juce::Colours::orange,
                                                                      juce::Colours::orangered,
-                                                                     juce::Colour (0xFF414141)};
+                                                                     juce::Colour (0xFF414141) };
 
         fullBandBar.setColour (colours[Settings::numBands]);
         addAndMakeVisible (fullBandBar);
@@ -173,23 +173,21 @@ public:
         }
         addAndMakeVisible (barsParent);
 
-        separators.reserve (Settings::numBands - 1);
+        auto addSeparator = [&] (auto id)
+        {
+            separators.push_back (
+                std::make_unique<Separator> (constrainer, *params.getParameter (id)));
 
-        separators.push_back (std::make_unique<Separator> (
-            constrainer,
-            *params.getParameter (Settings::Parameters::CrossOver1::id)));
-        separators.push_back (std::make_unique<Separator> (
-            constrainer,
-            *params.getParameter (Settings::Parameters::CrossOver2::id)));
-        separators.push_back (std::make_unique<Separator> (
-            constrainer,
-            *params.getParameter (Settings::Parameters::CrossOver3::id)));
+            params.addParameterListener (id, this);
+        };
+
+        separators.reserve (Settings::numBands - 1);
+        addSeparator (Settings::Parameters::CrossOver1::id);
+        addSeparator (Settings::Parameters::CrossOver2::id);
+        addSeparator (Settings::Parameters::CrossOver3::id);
 
         for (auto& c : separators)
-        {
             barsParent.addAndMakeVisible (*c);
-            c->addComponentListener (this);
-        }
 
         constrainer.setMinimumOnscreenAmounts (0xffffff, 0xffffff, 0xffffff, 0xffffff);
 
@@ -220,6 +218,8 @@ public:
             c->setSize (separatorWidth, bounds.getHeight());
             c->init();
         }
+
+        updateLayout();
     }
 
     void setValues (const std::array<float, Settings::numRMS>& valuesToSet)
@@ -230,13 +230,14 @@ public:
         fullBandBar.setValue (valuesToSet[Settings::numBands]);
     }
 
-    void componentMovedOrResized ([[maybe_unused]] juce::Component& component,
-                                  bool wasMoved,
-                                  [[maybe_unused]] bool wasResized) override
+    void parameterChanged ([[maybe_unused]] const juce::String& parameterID,
+                           [[maybe_unused]] float newValue) override
     {
-        if (! wasMoved)
-            return;
+        updateLayout();
+    }
 
+    void updateLayout()
+    {
         const auto xOffset = barsParent.getPosition().getX();
 
         std::array<int, Settings::numBands> xPositions;
