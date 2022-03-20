@@ -13,19 +13,24 @@ class IpAndPortComponent : public juce::Component
 public:
     static constexpr int spacing = 7;
 
-    enum class State
-    {
-        disconnected,
-        connected,
-        error
-    };
-
-    IpAndPortComponent() : ip ("IP/HOST", juce::Colour (0xFFFF7E58)), port ("PORT", juce::Colour (0xFFFF7E58))
+    IpAndPortComponent() :
+        ip ("IP/HOST", juce::Colour (0xFFFF7E58)), port ("PORT", juce::Colour (0xFFFF7E58))
     {
         addAndMakeVisible (ip);
 
         port.setInputRestrictions (5, "0123456789");
         addAndMakeVisible (port);
+
+        ip.onValueChanged = [&]()
+        {
+            if (itemsChanged)
+                itemsChanged();
+        };
+        port.onValueChanged = [&]()
+        {
+            if (itemsChanged)
+                itemsChanged();
+        };
     }
 
     ~IpAndPortComponent() override = default;
@@ -40,30 +45,20 @@ public:
     }
 
     void setIP (const juce::String& ipToSet) { ip.setText (ipToSet); }
-
     juce::String getIP() const { return ip.getText(); }
 
     void setPort (int portToSet) { port.setText (portToSet == -1 ? "" : juce::String (portToSet)); }
-
     int getPort() const { return port.getText().getIntValue(); }
 
-    void setState (State newState)
+    void setTextColour (const juce::Colour& colourToSet)
     {
-        state = newState;
-        repaint();
+        ip.setTextColour (colourToSet);
+        port.setTextColour (colourToSet);
     }
 
-    std::function<void()> onReturnKey;
+    std::function<void (void)> itemsChanged;
 
 private:
-    void returnKeyPressed() const noexcept
-    {
-        if (onReturnKey)
-            onReturnKey();
-    }
-
-    State state = State::disconnected;
-
     EditableText ip;
     EditableText port;
 };

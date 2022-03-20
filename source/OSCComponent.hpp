@@ -6,66 +6,70 @@
 
 #include <JuceHeader.h>
 
+#include "ConnectionButton.hpp"
 #include "IpAndPortComponent.hpp"
 #include "OSCSenderPlus.hpp"
-#include "ConnectionButton.hpp"
 
-class OSCComponent : public juce::Component
+class OSCComponent : public juce::Component, public juce::Timer
 {
 public:
     OSCComponent (OSCSenderPlus& o) : oscSender (o)
     {
-        ipAndPort.onReturnKey = [&]() { connect(); };
+        ipAndPort.itemsChanged = [&]() { disconnect(); };
         ipAndPort.setIP (o.getHostName());
         ipAndPort.setPort (o.getPortNumber());
         addAndMakeVisible (ipAndPort);
 
-        connectionButton.onClick = [&] () { toggleConnection(); };
+        connectionButton.onClick = [&]() { toggleConnection(); };
         addAndMakeVisible (connectionButton);
 
         updateConnectionStatus();
+
+        startTimer (500);
     }
 
     ~OSCComponent() override = default;
 
+    void timerCallback() override
+    {
+        // update OSC status
+        if (oscSender.isConnected() && oscSender.hasFailedSendingMessages())
+            ipAndPort.setTextColour (juce::Colours::red);
+        else
+            ipAndPort.setTextColour (juce::Colours::black);
+    }
+
     void toggleConnection()
     {
         if (oscSender.isConnected())
-        {
-            oscSender.disconnect();
-            ipAndPort.setState (IpAndPortComponent::State::disconnected);
-        }
+            disconnect();
         else
             connect();
-
-        ipAndPort.setState (oscSender.isConnected() ? IpAndPortComponent::State::connected
-                                                    : IpAndPortComponent::State::disconnected);
-        updateConnectionStatus();
     }
 
     void connect() noexcept
     {
-        if (oscSender.connect (ipAndPort.getIP(), ipAndPort.getPort()))
-            ipAndPort.setState (IpAndPortComponent::State::connected);
-        else
-            ipAndPort.setState (IpAndPortComponent::State::error);
+        oscSender.connect (ipAndPort.getIP(), ipAndPort.getPort());
+        updateConnectionStatus();
+    }
 
+    void disconnect() noexcept
+    {
+        oscSender.disconnect();
         updateConnectionStatus();
     }
 
     void resized() override
     {
         auto bounds = getLocalBounds();
-        connectionButton.setBounds (bounds.removeFromRight (30).removeFromTop (bounds.getHeight() / 2));
+        connectionButton.setBounds (
+            bounds.removeFromRight (30).removeFromTop (bounds.getHeight() / 2));
         bounds.removeFromRight (IpAndPortComponent::spacing);
         ipAndPort.setBounds (bounds);
     }
 
 private:
-    void updateConnectionStatus()
-    {
-        connectionButton.setConnected (oscSender.isConnected());
-    }
+    void updateConnectionStatus() { connectionButton.setConnected (oscSender.isConnected()); }
 
     OSCSenderPlus& oscSender;
 

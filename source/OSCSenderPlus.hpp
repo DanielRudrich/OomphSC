@@ -5,7 +5,7 @@
 #include <JuceHeader.h>
 #include <atomic>
 
-class OSCSenderPlus : public juce::OSCSender
+class OSCSenderPlus
 {
 public:
     OSCSenderPlus() { connected.store (false, std::memory_order_relaxed); }
@@ -22,7 +22,7 @@ public:
         }
 
         disconnect();
-        if (juce::OSCSender::connect (targetHostName, port))
+        if (sender.connect (targetHostName, port))
         {
             connected.store (true, std::memory_order_relaxed);
             DBG ("OSC: connected.");
@@ -37,7 +37,7 @@ public:
 
     bool disconnect()
     {
-        if (OSCSender::disconnect())
+        if (sender.disconnect())
         {
             DBG ("OSC: disconnected.");
             connected.store (false, std::memory_order_relaxed);
@@ -48,15 +48,33 @@ public:
             DBG ("OSC: failed to disconnet.");
             return false;
         }
+
+        sendingFailed = false;
+    }
+
+    bool send (const juce::OSCMessage& message)
+    {
+        auto success = sender.send (message);
+        sendingFailed = ! success;
+        return success;
+    }
+
+    bool send (const juce::OSCBundle& bundle)
+    {
+        auto success = sender.send (bundle);
+        sendingFailed = ! success;
+        return success;
     }
 
     int getPortNumber() const noexcept { return port; }
-
     juce::String getHostName() const noexcept { return hostName; }
-
     bool isConnected() const noexcept { return connected.load (std::memory_order_relaxed); }
+    bool hasFailedSendingMessages() const noexcept { return sendingFailed; }
 
 private:
+    juce::OSCSender sender;
+    bool sendingFailed = false;
+
     juce::String hostName;
     int port = -1;
     std::atomic<bool> connected;
