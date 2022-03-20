@@ -6,7 +6,7 @@ set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project (OomphSC VERSION "0.3.0")
+project (OomphSC VERSION "0.4.0")
 
 set (CMAKE_CXX_STANDARD 17)
 
@@ -17,7 +17,7 @@ juce_add_plugin (OomphSC
     PLUGIN_CODE OoSC
     COMPANY_NAME "Daniel Rudrich"
     PRODUCT_NAME "OomphSC"
-    FORMATS VST3
+    FORMATS VST3 Standalone
     COPY_PLUGIN_AFTER_BUILD True)
 
 juce_add_binary_data (fonts
