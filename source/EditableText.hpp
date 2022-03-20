@@ -3,11 +3,13 @@
 #pragma once
 #include "Fonts.hpp"
 #include <JuceHeader.h>
+#include <functional>
 
 class EditableText : public juce::Component
 {
 public:
-    EditableText (juce::String labelText, juce::Colour mainColour) : label (labelText), colour (mainColour)
+    EditableText (juce::String labelText, juce::Colour mainColour) :
+        label (labelText), colour (mainColour)
     {
     }
 
@@ -22,18 +24,42 @@ public:
         g.fillRect (bounds);
 
         g.setFont (Fonts::getRegularFont (15));
-        g.setColour (juce::Colours::black);
+        g.setColour (textColour);
 
         auto textBounds = getLocalBounds().reduced (5, 4).toFloat();
 
-        g.drawText (text,
-                    textBounds,
-                    juce::Justification::centredTop);
+        g.drawText (text, textBounds, juce::Justification::centredTop);
+
+        g.setColour (juce::Colours::black);
         g.drawText (label, textBounds, juce::Justification::centredBottom);
     }
 
-    void setText (const juce::String& newText) { text = newText; repaint(); }
+    /** @brief Updates text.
+
+     Returns true if the text has actually changed, returns false if it was the same.
+     */
+    bool setText (const juce::String& newText)
+    {
+        if (text != newText)
+        {
+            text = newText;
+            repaint();
+            return true;
+        }
+
+        return false;
+    }
+
     juce::String getText() const noexcept { return text; }
+
+    void setTextColour (const juce::Colour& colourToSet)
+    {
+        if (textColour != colourToSet)
+        {
+            textColour = colourToSet;
+            repaint();
+        }
+    }
 
     void mouseDown ([[maybe_unused]] const juce::MouseEvent& e) override {}
 
@@ -65,8 +91,7 @@ public:
 
             editor->onReturnKey = [&]()
             {
-                const auto newValue = editor->getText();
-
+                updateTextFromEditor();
                 hideEditor();
             };
 
@@ -77,7 +102,11 @@ public:
         }
     }
 
-    void inputAttemptWhenModal() override { hideEditor(); }
+    void inputAttemptWhenModal() override
+    {
+        updateTextFromEditor();
+        hideEditor();
+    }
 
     void hideEditor()
     {
@@ -94,13 +123,23 @@ public:
         allowedCharacters = characters;
     }
 
+    std::function<void (void)> onValueChanged;
+
 private:
     juce::String text;
     juce::String label;
     juce::Colour colour;
+    juce::Colour textColour = juce::Colours::black;
 
     int maxLength = 0;
     juce::String allowedCharacters = juce::String();
 
     std::unique_ptr<juce::TextEditor> editor;
+
+    void updateTextFromEditor()
+    {
+        auto textHasChanged = setText (editor->getText());
+        if (textHasChanged && onValueChanged)
+            onValueChanged();
+    }
 };
