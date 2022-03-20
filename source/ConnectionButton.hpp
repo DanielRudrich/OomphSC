@@ -37,16 +37,12 @@ public:
         // line
         disconnected.startNewSubPath ({6.0f, 9.2f});
         disconnected.lineTo ({12.0f, -1.2f});
-
-        setToggleable (true);
-        setClickingTogglesState (true);
     }
 
     ~ConnectionButton() override = default;
 
-    void paintButton (juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    void paintButton (juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool /* shouldDrawButtonAsDown */) override
     {
-        const auto isConnected = getToggleState();
         const auto activeColour = juce::Colour (0xFFFF7E58);
 
         auto bounds = getLocalBounds();
@@ -62,7 +58,14 @@ public:
     }
 
 
+    void setConnected (bool shouldBeConnected) noexcept
+    {
+        isConnected = shouldBeConnected;
+        repaint();
+    }
 private:
     juce::Path connected;
     juce::Path disconnected;
+
+    bool isConnected = false;
 };

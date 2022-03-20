@@ -18,7 +18,6 @@ public:
         if (portNumber == -1 || targetHostName.isEmpty())
         {
             disconnect();
-            connected.store (false, std::memory_order_relaxed);
             return true;
         }
 
@@ -26,21 +25,29 @@ public:
         if (juce::OSCSender::connect (targetHostName, port))
         {
             connected.store (true, std::memory_order_relaxed);
+            DBG ("OSC: connected.");
             return true;
         }
         else
+        {
+            DBG ("OSC: failed connection attempt.");
             return false;
+        }
     }
 
     bool disconnect()
     {
         if (OSCSender::disconnect())
         {
+            DBG ("OSC: disconnected.");
             connected.store (false, std::memory_order_relaxed);
             return true;
         }
         else
+        {
+            DBG ("OSC: failed to disconnet.");
             return false;
+        }
     }
 
     int getPortNumber() const noexcept { return port; }

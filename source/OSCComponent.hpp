@@ -20,9 +20,10 @@ public:
         ipAndPort.setPort (o.getPortNumber());
         addAndMakeVisible (ipAndPort);
 
+        connectionButton.onClick = [&] () { toggleConnection(); };
         addAndMakeVisible (connectionButton);
 
-        updateButtonText();
+        updateConnectionStatus();
     }
 
     ~OSCComponent() override = default;
@@ -39,7 +40,7 @@ public:
 
         ipAndPort.setState (oscSender.isConnected() ? IpAndPortComponent::State::connected
                                                     : IpAndPortComponent::State::disconnected);
-        updateButtonText();
+        updateConnectionStatus();
     }
 
     void connect() noexcept
@@ -49,7 +50,7 @@ public:
         else
             ipAndPort.setState (IpAndPortComponent::State::error);
 
-        updateButtonText();
+        updateConnectionStatus();
     }
 
     void resized() override
@@ -61,12 +62,9 @@ public:
     }
 
 private:
-    void updateButtonText()
+    void updateConnectionStatus()
     {
-        if (oscSender.isConnected())
-            DBG ("connected");
-        else
-            DBG ("not connected");
+        connectionButton.setConnected (oscSender.isConnected());
     }
 
     OSCSenderPlus& oscSender;
