@@ -33,6 +33,8 @@ public:
             DBG ("OSC: failed connection attempt.");
             return false;
         }
+
+        sendingFailed = false;
     }
 
     bool disconnect()

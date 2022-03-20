@@ -70,8 +70,8 @@ public:
             auto bounds = juce::Rectangle<int> (0, 0, getWidth(), getHeight() / 2);
 
             editor = std::make_unique<juce::TextEditor>();
+            editor->setMultiLine (false);
             editor->setBounds (bounds);
-            editor->setKeyboardType (juce::TextInputTarget::VirtualKeyboardType::decimalKeyboard);
             editor->setFont (Fonts::getRegularFont (15));
 
             editor->setJustification (juce::Justification::centred);
@@ -96,9 +96,9 @@ public:
             };
 
             editor->onEscapeKey = [&]() { hideEditor(); };
-            editor->onFocusLost = [&]() { hideEditor(); };
+            editor->onFocusLost = editor->onReturnKey;
 
-            enterModalState (false);
+            enterModalState (true);
         }
     }
 
