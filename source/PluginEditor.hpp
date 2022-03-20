@@ -1,7 +1,10 @@
 #pragma once
 
 #include "OSCComponent.hpp"
+#include "PeakRMSButton.hpp"
 #include "PluginProcessor.hpp"
+#include "Slider.hpp"
+#include "Visualizer.hpp"
 
 //==============================================================================
 class OomphSCEditor : public juce::AudioProcessorEditor, private juce::Timer
@@ -17,23 +20,19 @@ public:
     void timerCallback() override;
 
 private:
-    juce::LookAndFeel_V4 laf;
     OomphSCProcessor& processorReference;
     OSCComponent oscComponent;
 
+    std::unique_ptr<juce::Drawable> logo;
+
     // parameter controls
-    using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    PeakRMSButton peakRMSButton;
 
-    juce::Slider attack;
-    std::unique_ptr<SliderAttachment> attackAttachment;
-    juce::Slider release;
-    std::unique_ptr<SliderAttachment> releaseAttachment;
-
-    std::array<juce::Slider, 3> crossOverFrequencies;
-    std::array<std::unique_ptr<SliderAttachment>, 3> crossOverFrequenciesAttachments;
+    Slider attack;
+    Slider release;
 
     // rms visuals
-    std::array<juce::Slider, 5> slider;
+    Visualizer visualizer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OomphSCEditor)
 };
