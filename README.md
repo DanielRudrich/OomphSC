@@ -3,6 +3,7 @@ Audio Plug-in which figures out the Oomph of a signal (RMS and 4-band RMS) and s
 
 [![Build Plug-in](https://github.com/DanielRudrich/OomphSC/actions/workflows/build.yml/badge.svg)](https://github.com/DanielRudrich/OomphSC/actions/workflows/build.yml)
 
+![Screenshot](screenshot.png)
 
 ## Motivation
 
