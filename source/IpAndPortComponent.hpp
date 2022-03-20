@@ -9,9 +9,10 @@
 class IpAndPortComponent : public juce::Component
 {
     static constexpr int portWidth = 50;
-    static constexpr int spacing = 7;
 
 public:
+    static constexpr int spacing = 7;
+
     enum class State
     {
         disconnected,
@@ -19,7 +20,7 @@ public:
         error
     };
 
-    IpAndPortComponent() : ip ("IP/HOST", juce::Colour (0xFF180DFF)), port ("PORT", juce::Colour (0xFF180DFF))
+    IpAndPortComponent() : ip ("IP/HOST", juce::Colour (0xFFFF7E58)), port ("PORT", juce::Colour (0xFFFF7E58))
     {
         addAndMakeVisible (ip);
 

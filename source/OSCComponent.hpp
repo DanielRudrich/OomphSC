@@ -8,6 +8,7 @@
 
 #include "IpAndPortComponent.hpp"
 #include "OSCSenderPlus.hpp"
+#include "ConnectionButton.hpp"
 
 class OSCComponent : public juce::Component
 {
@@ -18,6 +19,8 @@ public:
         ipAndPort.setIP (o.getHostName());
         ipAndPort.setPort (o.getPortNumber());
         addAndMakeVisible (ipAndPort);
+
+        addAndMakeVisible (connectionButton);
 
         updateButtonText();
     }
@@ -52,7 +55,8 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        bounds.removeFromRight (40);
+        connectionButton.setBounds (bounds.removeFromRight (30).removeFromTop (bounds.getHeight() / 2));
+        bounds.removeFromRight (IpAndPortComponent::spacing);
         ipAndPort.setBounds (bounds);
     }
 
@@ -68,4 +72,5 @@ private:
     OSCSenderPlus& oscSender;
 
     IpAndPortComponent ipAndPort;
+    ConnectionButton connectionButton;
 };
