@@ -265,7 +265,7 @@ public:
             frequencies[i].setOriginWithOriginalSize (origin);
         }
 
-        xPositions[Settings::numBands - 1] = getWidth();
+        xPositions[Settings::numBands - 1] = getWidth() - xOffset;
 
         std::sort (xPositions.begin(), xPositions.end());
 
