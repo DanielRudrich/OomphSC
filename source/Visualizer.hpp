@@ -136,7 +136,10 @@ public:
         g.setColour (fillColour.withAlpha (0.2f));
         g.fillRect (bounds);
 
-        auto height = value * bounds.getHeight();
+        constexpr auto dynamicRange = 60.0f;
+        const auto amount =
+            std::clamp (1.0f + juce::Decibels::gainToDecibels (value) / dynamicRange, 0.0f, 1.0f);
+        const auto height = amount * bounds.getHeight();
 
         g.setColour (fillColour);
         g.fillRect (bounds.removeFromBottom (static_cast<int> (height)));
@@ -262,7 +265,7 @@ public:
             frequencies[i].setOriginWithOriginalSize (origin);
         }
 
-        xPositions[Settings::numBands - 1] = getWidth();
+        xPositions[Settings::numBands - 1] = getWidth() - xOffset;
 
         std::sort (xPositions.begin(), xPositions.end());
 
