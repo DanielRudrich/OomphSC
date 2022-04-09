@@ -7,7 +7,7 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     processorReference (p),
     oscComponent (processorReference.getOSCSender()),
     peakRMSButton (*processorReference.getAPVTS().getParameter (
-        Settings::Parameters::LevelCalculationType::id)),
+        Settings::Parameters::InputMode::id)),
     attack (*processorReference.getAPVTS().getParameter (Settings::Parameters::Attack::id),
             juce::String ("ATTACK"),
             juce::Colour (0xFF00C9FF)),

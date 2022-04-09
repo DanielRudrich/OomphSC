@@ -69,12 +69,12 @@ struct Parameters
         static constexpr float defaultValue = 50.0f;
     };
 
-    struct LevelCalculationType
+    struct InputMode
     {
-        static inline juce::String id = "levelCalculation";
-        static inline juce::String name = "Level Calculation Type";
-        static inline juce::StringArray choices = { "Peak", "RMS" };
-        static constexpr int defaultValue = 0;
+        static inline juce::String id = "inputMode";
+        static inline juce::String name = "Input Mode";
+        static inline juce::StringArray choices = { "Sum to Mono", "Stereo" };
+        static constexpr int defaultValue = 1;
     };
 };
 } // namespace Settings

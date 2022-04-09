@@ -5,6 +5,7 @@
 
 #include "OSCSenderPlus.hpp"
 #include "Settings.hpp"
+#include "MonoAnalyzer.hpp"
 
 //==============================================================================
 /**
@@ -69,11 +70,7 @@ private:
     std::array<std::atomic<float>*, Settings::numCrossOvers> crossOver;
 
     OSCSenderPlus oscSender;
-
-    std::array<juce::dsp::BallisticsFilter<float>, Settings::numRMS> rms;
-
-    using CrossOver = juce::dsp::LinkwitzRileyFilter<float>;
-    std::array<CrossOver, Settings::numCrossOvers> crossOvers;
+    MonoAnalyzer analyzers;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OomphSCProcessor)

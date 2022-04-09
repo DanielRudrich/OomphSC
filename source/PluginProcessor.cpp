@@ -57,10 +57,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         Parameters::Release::defaultValue,
         Parameters::Release::unit));
 
-    params.push_back (std::make_unique<APC> (Parameters::LevelCalculationType::id,
-                                             Parameters::LevelCalculationType::name,
-                                             Parameters::LevelCalculationType::choices,
-                                             Parameters::LevelCalculationType::defaultValue));
+    params.push_back (std::make_unique<APC> (Parameters::InputMode::id,
+                                             Parameters::InputMode::name,
+                                             Parameters::InputMode::choices,
+                                             Parameters::InputMode::defaultValue));
 
     return { params.begin(), params.end() };
 }
@@ -72,34 +72,25 @@ OomphSCProcessor::OomphSCProcessor()
     AudioProcessor (BusesProperties()
     #if ! JucePlugin_IsMidiEffect
         #if ! JucePlugin_IsSynth
-                        .withInput ("Input", juce::AudioChannelSet::mono(), true)
+                        .withInput ("Input", juce::AudioChannelSet::stereo(), true)
         #endif
-                        .withOutput ("Output", juce::AudioChannelSet::mono(), true)
+                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
     #endif
                         ),
 #endif
-    params (*this, nullptr, "RMSOSC", createParameterLayout())
+    params (*this, nullptr, "OomphSC", createParameterLayout())
 {
-    using namespace juce::dsp;
     using namespace Settings;
 
-    crossOvers[0].setCutoffFrequency (Settings::Parameters::CrossOver1::defaultValue);
-    crossOvers[1].setCutoffFrequency (Settings::Parameters::CrossOver2::defaultValue);
-    crossOvers[2].setCutoffFrequency (Settings::Parameters::CrossOver3::defaultValue);
-
-    for (auto& e : rms)
-    {
-        e.setAttackTime (5.0f);
-        e.setReleaseTime (100.0f);
-        e.setLevelCalculationType (BallisticsFilterLevelCalculationType::RMS);
-    }
+    analyzers.setAttackTime (Settings::Parameters::Attack::defaultValue);
+    analyzers.setReleaseTime (Settings::Parameters::Release::defaultValue);
 
     params.addParameterListener (Parameters::CrossOver1::id, this);
     params.addParameterListener (Parameters::CrossOver2::id, this);
     params.addParameterListener (Parameters::CrossOver3::id, this);
     params.addParameterListener (Parameters::Attack::id, this);
     params.addParameterListener (Parameters::Release::id, this);
-    params.addParameterListener (Parameters::LevelCalculationType::id, this);
+    params.addParameterListener (Parameters::InputMode::id, this);
 
     crossOver[0] = params.getRawParameterValue (Parameters::CrossOver1::id);
     crossOver[1] = params.getRawParameterValue (Parameters::CrossOver2::id);
@@ -108,6 +99,7 @@ OomphSCProcessor::OomphSCProcessor()
     for (auto& e : rmsValues)
         e.store (0.0f, std::memory_order_relaxed);
 
+    updateCrossovers();
     startTimer (50);
 }
 
@@ -186,11 +178,7 @@ void OomphSCProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     juce::dsp::ProcessSpec specs { sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1 };
 
-    for (auto& e : rms)
-        e.prepare (specs);
-
-    for (auto& e : crossOvers)
-        e.prepare (specs);
+    analyzers.prepare (specs);
 }
 
 void OomphSCProcessor::releaseResources()
@@ -201,7 +189,10 @@ void OomphSCProcessor::releaseResources()
 bool OomphSCProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     juce::ignoreUnused (layouts);
-    return true;
+    if (layouts.getMainInputChannels() <= 2)
+        return true;
+
+    return false;
 }
 #endif
 
@@ -211,30 +202,7 @@ void OomphSCProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     juce::ignoreUnused (midiMessages);
 
     auto* chPtr = buffer.getReadPointer (0);
-
-    std::array<float, Settings::numRMS> rmsTemp;
-    for (size_t i = 0; i < Settings::numRMS; ++i)
-        rmsTemp[i] = rmsValues[i].load (std::memory_order_relaxed);
-
-    // RMS fullband
-    for (int i = 0; i < buffer.getNumSamples(); ++i)
-        rmsTemp[Settings::numBands] = rms[Settings::numBands].processSample (0, chPtr[i]);
-
-    // RMS per band
-    for (int i = 0; i < buffer.getNumSamples(); ++i)
-    {
-        auto x = chPtr[i];
-        std::array<float, Settings::numBands> bands;
-        crossOvers[1].processSample (0, x, bands[0], bands[2]);
-        crossOvers[0].processSample (0, bands[0], bands[0], bands[1]);
-        crossOvers[2].processSample (0, bands[2], bands[2], bands[3]);
-
-        for (size_t b = 0; b < Settings::numBands; ++b)
-            rmsTemp[b] = rms[b].processSample (0, bands[b]);
-    }
-
-    for (size_t i = 0; i < Settings::numRMS; ++i)
-        rmsValues[i].store (rmsTemp[i], std::memory_order_relaxed);
+    analyzers.process (chPtr, buffer.getNumSamples(), rmsValues);
 }
 
 //==============================================================================
@@ -286,7 +254,7 @@ void OomphSCProcessor::updateCrossovers()
     std::sort (frequencies.begin(), frequencies.end());
 
     for (size_t i = 0; i < Settings::numCrossOvers; ++i)
-        crossOvers[i].setCutoffFrequency (frequencies[i]);
+        analyzers.setCutoffFrequency (i, frequencies[i]);
 }
 
 void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float newValue)
@@ -299,16 +267,10 @@ void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float 
         updateCrossovers();
 
     else if (parameterID == Parameters::Attack::id)
-        for (auto& e : rms)
-            e.setAttackTime (newValue);
+        analyzers.setAttackTime (newValue);
 
     else if (parameterID == Parameters::Release::id)
-        for (auto& e : rms)
-            e.setReleaseTime (newValue);
-
-    else if (parameterID == Parameters::LevelCalculationType::id)
-        for (auto& e : rms)
-            e.setLevelCalculationType (BallisticsFilterLevelCalculationType (newValue));
+        analyzers.setReleaseTime (newValue);
 }
 
 void OomphSCProcessor::timerCallback()

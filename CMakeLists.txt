@@ -38,6 +38,7 @@ target_sources (OomphSC PRIVATE
     source/OSCComponent.hpp
     source/ConnectionButton.hpp
     source/IpAndPortComponent.hpp
+    source/MonoAnalyzer.hpp
     source/OSCSenderPlus.hpp
     source/PluginProcessor.hpp
     source/PluginProcessor.cpp
