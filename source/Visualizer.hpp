@@ -122,10 +122,24 @@ public:
 
     void setValue (float newValue)
     {
-        if (value == newValue)
+        stereoMode = false;
+
+        if (values[0] == newValue)
             return;
 
-        value = newValue;
+        values[0] = newValue;
+        repaint();
+    }
+
+    void setValues (float valueLeft, float valueRight)
+    {
+        stereoMode = true;
+
+        if (values[0] == valueLeft && values[1] == valueRight)
+            return;
+
+        values[0] = valueLeft;
+        values[1] = valueRight;
         repaint();
     }
 
@@ -135,19 +149,38 @@ public:
 
         g.setColour (fillColour.withAlpha (0.2f));
         g.fillRect (bounds);
-
-        constexpr auto dynamicRange = 60.0f;
-        const auto amount =
-            std::clamp (1.0f + juce::Decibels::gainToDecibels (value) / dynamicRange, 0.0f, 1.0f);
-        const auto height = amount * bounds.getHeight();
-
         g.setColour (fillColour);
-        g.fillRect (bounds.removeFromBottom (static_cast<int> (height)));
+
+        const auto fullHeight = bounds.getHeight();
+        const auto valueToHeight = [fullHeight] (float value)
+        {
+            constexpr auto dynamicRange = 60.0f;
+            const auto amount =
+                std::clamp (1.0f + juce::Decibels::gainToDecibels (value) / dynamicRange,
+                            0.0f,
+                            1.0f);
+            return static_cast<int> (amount * fullHeight);
+        };
+
+        if (stereoMode)
+        {
+            const auto width = bounds.getWidth() - 3;
+            g.fillRect (
+                bounds.removeFromLeft (width / 2).removeFromBottom (valueToHeight (values[0])));
+            g.fillRect (
+                bounds.removeFromRight (width / 2).removeFromBottom (valueToHeight (values[1])));
+        }
+        else // mono
+        {
+            const auto height = valueToHeight (values[0]);
+            g.fillRect (bounds.removeFromBottom (height));
+        }
     }
 
 private:
     juce::Colour fillColour;
-    float value = 0.0f;
+    bool stereoMode = false;
+    float values[2] = { 0.0f, 0.0f };
 };
 
 class Visualizer : public juce::Component, public juce::AudioProcessorValueTreeState::Listener
@@ -231,6 +264,15 @@ public:
             bars[i].setValue (valuesToSet[i]);
 
         fullBandBar.setValue (valuesToSet[Settings::numBands]);
+    }
+
+    void setValues (const std::array<float, Settings::numRMS>& valuesLeft,
+                    const std::array<float, Settings::numRMS>& valuesRight)
+    {
+        for (size_t i = 0; i < Settings::numBands; ++i)
+            bars[i].setValues (valuesLeft[i], valuesRight[i]);
+
+        fullBandBar.setValues (valuesLeft[Settings::numBands], valuesRight[Settings::numBands]);
     }
 
     void parameterChanged ([[maybe_unused]] const juce::String& parameterID,

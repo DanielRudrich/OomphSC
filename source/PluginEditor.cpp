@@ -6,8 +6,8 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     AudioProcessorEditor (&p),
     processorReference (p),
     oscComponent (processorReference.getOSCSender()),
-    peakRMSButton (*processorReference.getAPVTS().getParameter (
-        Settings::Parameters::InputMode::id)),
+    peakRMSButton (
+        *processorReference.getAPVTS().getParameter (Settings::Parameters::InputMode::id)),
     attack (*processorReference.getAPVTS().getParameter (Settings::Parameters::Attack::id),
             juce::String ("ATTACK"),
             juce::Colour (0xFF00C9FF)),
@@ -88,13 +88,24 @@ void OomphSCEditor::resized()
 
 void OomphSCEditor::timerCallback()
 {
-    std::array<float, 5> values;
-
-    for (size_t i = 0; i < 5; ++i)
+    if (processorReference.isInStereoMode())
     {
-        const auto value = processorReference.rmsValues[i].load (std::memory_order_relaxed);
-        values[i] = value;
-    }
+        std::array<float, 5> valuesLeft;
+        std::array<float, 5> valuesRight;
+        for (size_t i = 0; i < 5; ++i)
+        {
+            valuesLeft[i] = processorReference.rmsValues[0][i].load (std::memory_order_relaxed);
+            valuesRight[i] = processorReference.rmsValues[1][i].load (std::memory_order_relaxed);
+        }
 
-    visualizer.setValues (values);
+        visualizer.setValues (valuesLeft, valuesRight);
+    }
+    else
+    {
+        std::array<float, 5> values;
+        for (size_t i = 0; i < 5; ++i)
+            values[i] = processorReference.rmsValues[0][i].load (std::memory_order_relaxed);
+
+        visualizer.setValues (values);
+    }
 }

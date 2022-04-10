@@ -82,8 +82,11 @@ OomphSCProcessor::OomphSCProcessor()
 {
     using namespace Settings;
 
-    analyzers.setAttackTime (Settings::Parameters::Attack::defaultValue);
-    analyzers.setReleaseTime (Settings::Parameters::Release::defaultValue);
+    for (auto& a : analyzers)
+    {
+        a.setAttackTime (Settings::Parameters::Attack::defaultValue);
+        a.setReleaseTime (Settings::Parameters::Release::defaultValue);
+    }
 
     params.addParameterListener (Parameters::CrossOver1::id, this);
     params.addParameterListener (Parameters::CrossOver2::id, this);
@@ -95,9 +98,11 @@ OomphSCProcessor::OomphSCProcessor()
     crossOver[0] = params.getRawParameterValue (Parameters::CrossOver1::id);
     crossOver[1] = params.getRawParameterValue (Parameters::CrossOver2::id);
     crossOver[2] = params.getRawParameterValue (Parameters::CrossOver3::id);
+    inputMode = params.getRawParameterValue (Parameters::InputMode::id);
 
-    for (auto& e : rmsValues)
-        e.store (0.0f, std::memory_order_relaxed);
+    for (auto& ch : rmsValues)
+        for (auto& e : ch)
+            e.store (0.0f, std::memory_order_relaxed);
 
     updateCrossovers();
     startTimer (50);
@@ -178,7 +183,10 @@ void OomphSCProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     juce::dsp::ProcessSpec specs { sampleRate, static_cast<juce::uint32> (samplesPerBlock), 1 };
 
-    analyzers.prepare (specs);
+    copyBuffer.setSize (1, samplesPerBlock);
+
+    for (auto& a : analyzers)
+        a.prepare (specs);
 }
 
 void OomphSCProcessor::releaseResources()
@@ -200,9 +208,21 @@ void OomphSCProcessor::processBlock (juce::AudioBuffer<float>& buffer,
                                      juce::MidiBuffer& midiMessages)
 {
     juce::ignoreUnused (midiMessages);
+    const auto numSamples = buffer.getNumSamples();
+    const auto numChannels = std::min (buffer.getNumChannels(), 2);
 
-    auto* chPtr = buffer.getReadPointer (0);
-    analyzers.process (chPtr, buffer.getNumSamples(), rmsValues);
+    if (isInStereoMode() && numChannels == 2)
+    {
+        for (size_t ch = 0; ch < static_cast<size_t> (numChannels); ++ch)
+            analyzers[ch].process (buffer.getReadPointer ((int) ch), numSamples, rmsValues[ch]);
+    }
+    else // sum to mono
+    {
+        copyBuffer.copyFrom (0, 0, buffer.getReadPointer (0), numSamples);
+        copyBuffer.addFrom (0, 0, buffer.getReadPointer (1), numSamples);
+
+        analyzers[0].process (copyBuffer.getReadPointer (0), numSamples, rmsValues[0]);
+    }
 }
 
 //==============================================================================
@@ -253,8 +273,9 @@ void OomphSCProcessor::updateCrossovers()
 
     std::sort (frequencies.begin(), frequencies.end());
 
-    for (size_t i = 0; i < Settings::numCrossOvers; ++i)
-        analyzers.setCutoffFrequency (i, frequencies[i]);
+    for (auto& a : analyzers)
+        for (size_t i = 0; i < Settings::numCrossOvers; ++i)
+            a.setCutoffFrequency (i, frequencies[i]);
 }
 
 void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float newValue)
@@ -267,21 +288,36 @@ void OomphSCProcessor::parameterChanged (const juce::String& parameterID, float 
         updateCrossovers();
 
     else if (parameterID == Parameters::Attack::id)
-        analyzers.setAttackTime (newValue);
+        for (auto& a : analyzers)
+            a.setAttackTime (newValue);
 
     else if (parameterID == Parameters::Release::id)
-        analyzers.setReleaseTime (newValue);
+        for (auto& a : analyzers)
+            a.setReleaseTime (newValue);
 }
 
 void OomphSCProcessor::timerCallback()
 {
     if (oscSender.isConnected())
     {
-        oscSender.send ({ "/rms/full/", rmsValues[4].load (std::memory_order_relaxed) });
+        const auto stereoMode = isInStereoMode();
+
+        auto fullMessage = juce::OSCMessage ("/rms/full/");
+        fullMessage.addFloat32 (rmsValues[0][4].load (std::memory_order_relaxed));
+        if (stereoMode)
+            fullMessage.addFloat32 (rmsValues[1][4].load (std::memory_order_relaxed));
+
+        oscSender.send (fullMessage);
 
         for (size_t i = 0; i < Settings::numBands; ++i)
-            oscSender.send ({ "/rms/band/" + juce::String (i) + "/",
-                              rmsValues[i].load (std::memory_order_relaxed) });
+        {
+            auto message = juce::OSCMessage ("/rms/band/" + juce::String (i) + "/");
+            message.addFloat32 (rmsValues[0][i].load (std::memory_order_relaxed));
+            if (stereoMode)
+                fullMessage.addFloat32 (rmsValues[1][i].load (std::memory_order_relaxed));
+
+            oscSender.send (message);
+        }
     }
 }
 

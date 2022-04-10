@@ -74,7 +74,7 @@ struct Parameters
         static inline juce::String id = "inputMode";
         static inline juce::String name = "Input Mode";
         static inline juce::StringArray choices = { "Sum to Mono", "Stereo" };
-        static constexpr int defaultValue = 1;
+        static constexpr int defaultValue = 0;
     };
 };
 } // namespace Settings
