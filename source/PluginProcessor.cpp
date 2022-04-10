@@ -314,7 +314,7 @@ void OomphSCProcessor::timerCallback()
             auto message = juce::OSCMessage ("/rms/band/" + juce::String (i) + "/");
             message.addFloat32 (rmsValues[0][i].load (std::memory_order_relaxed));
             if (stereoMode)
-                fullMessage.addFloat32 (rmsValues[1][i].load (std::memory_order_relaxed));
+                message.addFloat32 (rmsValues[1][i].load (std::memory_order_relaxed));
 
             oscSender.send (message);
         }
