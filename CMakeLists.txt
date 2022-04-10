@@ -6,7 +6,7 @@ set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project (OomphSC VERSION "0.5.0")
+project (OomphSC VERSION "0.6.0")
 
 set (CMAKE_CXX_STANDARD 17)
 
@@ -38,13 +38,14 @@ target_sources (OomphSC PRIVATE
     source/OSCComponent.hpp
     source/ConnectionButton.hpp
     source/IpAndPortComponent.hpp
+    source/MonoAnalyzer.hpp
     source/OSCSenderPlus.hpp
     source/PluginProcessor.hpp
     source/PluginProcessor.cpp
     source/PluginEditor.hpp
     source/PluginEditor.cpp
     source/Visualizer.hpp
-    source/PeakRMSButton.hpp
+    source/MonoStereoButton.hpp
     source/Slider.hpp
     source/EditableText.hpp
     source/Fonts.hpp)

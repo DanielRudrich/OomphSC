@@ -1,7 +1,7 @@
 #pragma once
 
 #include "OSCComponent.hpp"
-#include "PeakRMSButton.hpp"
+#include "MonoStereoButton.hpp"
 #include "PluginProcessor.hpp"
 #include "Slider.hpp"
 #include "Visualizer.hpp"
@@ -26,7 +26,7 @@ private:
     std::unique_ptr<juce::Drawable> logo;
 
     // parameter controls
-    PeakRMSButton peakRMSButton;
+    MonoStereoButton monoStereoButton;
 
     Slider attack;
     Slider release;

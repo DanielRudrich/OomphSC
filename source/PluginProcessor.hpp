@@ -3,8 +3,8 @@
 #include <JuceHeader.h>
 #include <array>
 
+#include "MonoAnalyzer.hpp"
 #include "OSCSenderPlus.hpp"
-#include "Settings.hpp"
 
 //==============================================================================
 /**
@@ -56,7 +56,7 @@ public:
 
     void timerCallback() override;
 
-    std::array<std::atomic<float>, Settings::numRMS> rmsValues;
+    std::array<std::array<std::atomic<float>, Settings::numRMS>, 2> rmsValues;
 
     OSCSenderPlus& getOSCSender() { return oscSender; }
 
@@ -64,16 +64,18 @@ public:
 
     void updateCrossovers();
 
+    bool isInStereoMode() const { return inputMode->load (std::memory_order_relaxed) > 0.0f; }
+
 private:
     juce::AudioProcessorValueTreeState params;
     std::array<std::atomic<float>*, Settings::numCrossOvers> crossOver;
 
+    std::atomic<float>* inputMode;
+
     OSCSenderPlus oscSender;
 
-    std::array<juce::dsp::BallisticsFilter<float>, Settings::numRMS> rms;
-
-    using CrossOver = juce::dsp::LinkwitzRileyFilter<float>;
-    std::array<CrossOver, Settings::numCrossOvers> crossOvers;
+    juce::AudioBuffer<float> copyBuffer;
+    std::array<MonoAnalyzer, 2> analyzers;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OomphSCProcessor)
