@@ -6,7 +6,7 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     AudioProcessorEditor (&p),
     processorReference (p),
     oscComponent (processorReference.getOSCSender()),
-    peakRMSButton (
+    monoStereoButton (
         *processorReference.getAPVTS().getParameter (Settings::Parameters::InputMode::id)),
     attack (*processorReference.getAPVTS().getParameter (Settings::Parameters::Attack::id),
             juce::String ("ATTACK"),
@@ -22,7 +22,7 @@ OomphSCEditor::OomphSCEditor (OomphSCProcessor& p) :
     logo = juce::Drawable::createFromImageData (BinaryLogo::logo_svg, BinaryLogo::logo_svgSize);
 
     // controls
-    addAndMakeVisible (peakRMSButton);
+    addAndMakeVisible (monoStereoButton);
     addAndMakeVisible (attack);
     addAndMakeVisible (release);
 
@@ -75,7 +75,7 @@ void OomphSCEditor::resized()
 
     bounds.removeFromBottom (2 * 7);
     auto row = bounds.removeFromBottom (42);
-    peakRMSButton.setBounds (row.removeFromLeft (sliderWidth));
+    monoStereoButton.setBounds (row.removeFromLeft (sliderWidth));
     row.removeFromLeft (spacing);
     attack.setBounds (row.removeFromLeft (sliderWidth));
     row.removeFromLeft (spacing);
